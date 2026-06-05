@@ -19,6 +19,7 @@ class CenaPorta extends Phaser.Scene {
   preload() {
     this.load.image('fundo', 'src/assets/images/fundo.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
+    this.load.image('titulo', 'src/assets/images/titulo.png');
   }
 
   // init() corre antes de create(). Garante que vidas/pontos existem no
@@ -148,11 +149,10 @@ class CenaPorta extends Phaser.Scene {
 
   // ---------- Menu (título + opções, à esquerda) ----------
   construirMenu() {
-    // Título no canto sup. esquerdo. stroke = contorno preto à volta das letras.
-    const titulo = this.add.text(110, 110, 'DISCO\nSECURITY', {
-      fontSize: '140px', color: '#ffffff', fontStyle: 'bold',
-      stroke: '#000000', strokeThickness: 12, lineSpacing: -10,
-    }).setOrigin(0, 0);
+    // Título: a imagem do logótipo. setOrigin(0,0) = ancorado no canto sup. esq.
+    // Para afinares: muda X, Y e a ESCALA (1 = tamanho original).
+    const titulo = this.add.image(90, 90, 'titulo').setOrigin(0, 0);
+    titulo.setScale(1.2);
 
     // Opções: texto a sério → clicável (e traduzível PT/EN depois).
     const jogar  = this.criarOpcao(120, 620, 'JOGAR',  () => this.iniciarJogo());
