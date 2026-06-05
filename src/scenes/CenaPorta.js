@@ -89,8 +89,8 @@ class CenaPorta extends Phaser.Scene {
   // ---------- Segurança (imagem, à direita junto à porta) ----------
   construirSeguranca() {
     // Para afinares: muda o X (esq./dir.), o Y (cima/baixo) e a ALTURA.
-    const X = 1470;
-    const Y = 720;
+    const X = 1450;
+    const Y = 770;
     const ALTURA = 700;
 
     this.seguranca = this.add.image(X, Y, 'seguranca');
