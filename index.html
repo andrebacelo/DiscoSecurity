@@ -5,8 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Disco Security</title>
   <style>
-    html, body { margin: 0; background: #15151f; }
-    #game { display: flex; justify-content: center; padding: 16px; }
+    /* Fonte pixel local (não depende de internet). O nome 'Press Start 2P'
+       é o que usamos depois no Phaser (fontFamily). */
+    @font-face {
+      font-family: 'Press Start 2P';
+      src: url('src/assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+      font-display: block;
+    }
+    html, body { margin: 0; height: 100%; background: #15151f; }
+    /* O contentor ocupa a janela toda; o Phaser (Scale.FIT) centra e ajusta. */
+    #game { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
   </style>
 </head>
 <body>
@@ -14,6 +22,8 @@
 
   <!-- Phaser 3 fixado na 3.90.0 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
+  <!-- Objetos primeiro (as cenas usam-nos), depois as cenas, main.js por último. -->
+  <script src="src/objects/Cliente.js"></script>
   <script src="src/scenes/CenaPorta.js"></script>
   <script src="src/scenes/GameOver.js"></script>
   <script src="src/main.js"></script>
