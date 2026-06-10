@@ -156,7 +156,7 @@ class CenaPorta extends Phaser.Scene {
     // Título: a imagem do logótipo. setOrigin(0,0) = ancorado no canto sup. esq.
     // Para afinares: muda X, Y e a ESCALA (1 = tamanho original).
     const titulo = this.add.image(90, 90, 'titulo').setOrigin(0, 0);
-    titulo.setScale(1.8);
+    titulo.setScale(0.8);
 
     // Opções: texto a sério → clicável (e traduzível PT/EN depois).
     const jogar  = this.criarOpcao(120, 420, 'JOGAR',  () => this.iniciarJogo());
@@ -174,7 +174,7 @@ class CenaPorta extends Phaser.Scene {
   criarOpcao(x, y, texto, aoClicar) {
     const LARG = 360, ALT = 84;
     // Cores tiradas do próprio logótipo: rosa do "Disco", cião do "Security".
-    const ROSA = 0xdf347b, CIAO = 0x2fcbe4; // normal / hover
+    const ROSA = 0xfe00bf, CIAO = 0x01fafe; // normal / hover
 
     // Placa: fundo escuro semi-transparente + contorno neon rosa.
     const moldura = this.add.rectangle(0, 0, LARG, ALT, 0x12121a, 0.7)
