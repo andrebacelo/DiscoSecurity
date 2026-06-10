@@ -25,4 +25,16 @@ const config = {
   scene: [CenaPorta, GameOverScene],
 };
 
-new Phaser.Game(config);
+// Esperamos a fonte pixel carregar ANTES de criar o jogo. Razão: o Phaser
+// desenha o texto numa textura no momento em que a cena arranca; se a fonte
+// ainda não estiver pronta, usa a do sistema e não volta a corrigir.
+async function arrancarJogo() {
+  try {
+    await document.fonts.load('16px "Press Start 2P"');
+    await document.fonts.ready;
+  } catch (e) {
+    console.warn('Fonte pixel não carregou, sigo com a do sistema:', e);
+  }
+  new Phaser.Game(config);
+}
+arrancarJogo();

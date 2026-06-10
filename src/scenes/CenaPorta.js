@@ -13,6 +13,7 @@ class CenaPorta extends Phaser.Scene {
   static POS_Y = 645;
   static PORTA_X = 1635;        // para onde vai quando o deixamos entrar.
   static TEMPO_LIMITE = 5000;   // ms para decidir cada cliente.
+  static FONTE = '"Press Start 2P"'; // fonte pixel (declarada no index.html).
 
   // preload() corre primeiro: carrega os ficheiros (imagens, som) para a
   // memória. 'fundo' é a chave; depois pedimos a imagem por esse nome.
@@ -104,11 +105,11 @@ class CenaPorta extends Phaser.Scene {
     const painel = this.add.rectangle(40, 40, 620, 300, 0x12121a, 0.85)
       .setOrigin(0, 0).setStrokeStyle(2, 0x55557a).setDepth(1);
     const titulo = this.add.text(70, 60, 'REGRAS À PORTA', {
-      fontSize: '34px', color: '#ffd166', fontStyle: 'bold',
+      fontFamily: CenaPorta.FONTE, fontSize: '22px', color: '#ffd166',
     }).setDepth(2);
-    const lista = this.add.text(70, 120,
+    const lista = this.add.text(70, 130,
       this.regras.map((r) => '•  ' + r.label).join('\n'),
-      { fontSize: '30px', color: '#dcdcff', lineSpacing: 12 }
+      { fontFamily: CenaPorta.FONTE, fontSize: '18px', color: '#dcdcff', lineSpacing: 20 }
     ).setDepth(2);
 
     this.uiJogo.push(painel, titulo, lista);
@@ -116,14 +117,17 @@ class CenaPorta extends Phaser.Scene {
 
   // ---------- HUD: vidas, pontos, feedback, dica ----------
   construirHUD() {
-    this.hudVidas = this.add.text(1880, 40, '', { fontSize: '44px', color: '#ff6b6b' })
-      .setOrigin(1, 0).setDepth(2);
-    this.hudPontos = this.add.text(1880, 100, '', { fontSize: '38px', color: '#a8e6a3' })
-      .setOrigin(1, 0).setDepth(2);
-    this.feedback = this.add.text(960, 150, '', { fontSize: '52px', fontStyle: 'bold' })
-      .setOrigin(0.5).setDepth(3);
+    this.hudVidas = this.add.text(1880, 40, '', {
+      fontFamily: CenaPorta.FONTE, fontSize: '30px', color: '#ff6b6b',
+    }).setOrigin(1, 0).setDepth(2);
+    this.hudPontos = this.add.text(1880, 100, '', {
+      fontFamily: CenaPorta.FONTE, fontSize: '22px', color: '#a8e6a3',
+    }).setOrigin(1, 0).setDepth(2);
+    this.feedback = this.add.text(960, 150, '', {
+      fontFamily: CenaPorta.FONTE, fontSize: '28px',
+    }).setOrigin(0.5).setDepth(3);
     const dica = this.add.text(960, 1020, '←  Barrar          →  Deixar entrar', {
-      fontSize: '34px', color: '#bbbbcc',
+      fontFamily: CenaPorta.FONTE, fontSize: '18px', color: '#bbbbcc',
     }).setOrigin(0.5).setDepth(2);
 
     this.atualizarHUD();
@@ -164,17 +168,36 @@ class CenaPorta extends Phaser.Scene {
     this.menu.setDepth(10);
   }
 
-  // Cria um item de menu clicável (branco com contorno) e devolve-o.
+  // Cria um botão de menu: uma "placa" (moldura neon) com o texto por cima.
+  // Devolve um container [moldura + texto] para se mover/agrupar como um só.
+  // O texto fica separado da imagem → continua traduzível (PT/EN) depois.
   criarOpcao(x, y, texto, aoClicar) {
-    const op = this.add.text(x, y, texto, {
-      fontSize: '64px', color: '#ffffff', fontStyle: 'bold',
-      stroke: '#000000', strokeThickness: 8,
-    }).setOrigin(0, 0.5);
-    op.setInteractive({ useHandCursor: true }); // clicável + cursor de mão
-    op.on('pointerdown', aoClicar);
-    op.on('pointerover', () => op.setColor('#ffd166')); // realce ao passar o rato
-    op.on('pointerout',  () => op.setColor('#ffffff'));
-    return op;
+    const LARG = 360, ALT = 84;
+    // Cores tiradas do próprio logótipo: rosa do "Disco", cião do "Security".
+    const ROSA = 0xdf347b, CIAO = 0x2fcbe4; // normal / hover
+
+    // Placa: fundo escuro semi-transparente + contorno neon rosa.
+    const moldura = this.add.rectangle(0, 0, LARG, ALT, 0x12121a, 0.7)
+      .setOrigin(0, 0.5).setStrokeStyle(4, ROSA);
+
+    // Texto pixel, centrado na placa.
+    const label = this.add.text(LARG / 2, 0, texto, {
+      fontFamily: CenaPorta.FONTE, fontSize: '26px', color: '#ffffff',
+    }).setOrigin(0.5);
+
+    const botao = this.add.container(x, y, [moldura, label]);
+
+    // A moldura é a zona clicável (área grande = mais fácil de acertar).
+    moldura.setInteractive({ useHandCursor: true });
+    moldura.on('pointerdown', aoClicar);
+    // Hover: contorno fica cião e o texto amarelo (realce).
+    moldura.on('pointerover', () => {
+      moldura.setStrokeStyle(4, CIAO); label.setColor('#ffd166');
+    });
+    moldura.on('pointerout', () => {
+      moldura.setStrokeStyle(4, ROSA); label.setColor('#ffffff');
+    });
+    return botao;
   }
 
   // ---------- JOGAR: reseta o jogo, mostra a UI, menu sobe, entra o cliente ----------
