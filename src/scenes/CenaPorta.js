@@ -158,6 +158,16 @@ class CenaPorta extends Phaser.Scene {
     const titulo = this.add.image(90, 90, 'titulo').setOrigin(0, 0);
     titulo.setScale(0.8);
 
+    // Brilho neon a "respirar": adiciona um glow e faz pulsar a sua força.
+    // postFX só existe em WebGL — protejo para não rebentar em Canvas.
+    if (titulo.postFX) {
+      const glow = titulo.postFX.addGlow(0xffffff, 2, 0); // branco suave
+      this.tweens.add({
+        targets: glow, outerStrength: 6,   // pulsa entre 2 e 6
+        duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+    }
+
     // Opções: texto a sério → clicável (e traduzível PT/EN depois).
     const jogar  = this.criarOpcao(120, 420, 'JOGAR',  () => this.iniciarJogo());
     const opcoes = this.criarOpcao(120, 540, 'OPÇÕES', () => {}); // TODO: opções
@@ -187,15 +197,21 @@ class CenaPorta extends Phaser.Scene {
 
     const botao = this.add.container(x, y, [moldura, label]);
 
+    // Glow neon na cor da moldura (só WebGL). Guardo a referência para
+    // mudar a cor/força no hover.
+    const glow = moldura.postFX ? moldura.postFX.addGlow(ROSA, 3, 0) : null;
+
     // A moldura é a zona clicável (área grande = mais fácil de acertar).
     moldura.setInteractive({ useHandCursor: true });
     moldura.on('pointerdown', aoClicar);
-    // Hover: contorno fica cião e o texto amarelo (realce).
+    // Hover: contorno e brilho ficam cião, texto amarelo (realce).
     moldura.on('pointerover', () => {
       moldura.setStrokeStyle(4, CIAO); label.setColor('#ffd166');
+      if (glow) { glow.color = CIAO; glow.outerStrength = 7; }
     });
     moldura.on('pointerout', () => {
       moldura.setStrokeStyle(4, ROSA); label.setColor('#ffffff');
+      if (glow) { glow.color = ROSA; glow.outerStrength = 3; }
     });
     return botao;
   }
