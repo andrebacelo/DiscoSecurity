@@ -152,7 +152,7 @@ class CenaPorta extends Phaser.Scene {
     // Título: a imagem do logótipo. setOrigin(0,0) = ancorado no canto sup. esq.
     // Para afinares: muda X, Y e a ESCALA (1 = tamanho original).
     const titulo = this.add.image(90, 90, 'titulo').setOrigin(0, 0);
-    titulo.setScale(1.7);
+    titulo.setScale(1.8);
 
     // Opções: texto a sério → clicável (e traduzível PT/EN depois).
     const jogar  = this.criarOpcao(120, 420, 'JOGAR',  () => this.iniciarJogo());
