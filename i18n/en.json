@@ -1,0 +1,48 @@
+{
+  "menu_jogar": "PLAY",
+  "menu_opcoes": "OPTIONS",
+  "menu_quit": "QUIT",
+
+  "opcoes_titulo": "OPTIONS",
+  "opcoes_dificuldade": "DIFFICULTY",
+  "opcoes_lingua": "LANGUAGE",
+  "lingua_nome": "ENGLISH",
+  "opcoes_clica": "click the lines to change",
+  "opcoes_voltar": "BACK",
+
+  "dif_facil": "EASY",
+  "dif_normal": "NORMAL",
+  "dif_dificil": "HARD",
+
+  "regras_titulo": "DOOR RULES",
+  "regra_idade18": "Minimum age: 18",
+  "regra_idade21": "Minimum age: 21",
+  "regra_crocs": "No crocs",
+  "regra_botas": "No boots",
+  "regra_chapeu": "No hats",
+
+  "hud_pontos": "Score: ",
+  "dica_porta": "←  Deny          →  Let in",
+  "fb_certo": "Correct!",
+  "fb_podia_entrar": "They could enter!",
+  "fb_entrou_proibido": "A banned one got in!",
+  "fb_tempo": "Time's up!",
+
+  "quit_obrigado": "Thanks for playing!",
+  "quit_fechar": "You can close the tab now.",
+
+  "pausa_titulo": "PAUSED",
+  "pausa_continuar": "RESUME",
+  "pausa_menu": "BACK TO MENU",
+  "pausa_dica": "ESC to resume",
+
+  "chase_aviso": "CATCH THE INTRUDER!",
+  "chase_dica": "Catch the intruder!  ←→ / A D move   SPACE jump",
+  "chase_intruso": "INTRUDER!",
+  "chase_apanhaste": "CAUGHT!",
+  "chase_escapou": "ESCAPED!",
+
+  "go_titulo": "GAME OVER",
+  "go_pontos": "Final score: ",
+  "go_reiniciar": "Press SPACE to restart"
+}
