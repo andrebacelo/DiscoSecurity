@@ -10,7 +10,7 @@ class CenaPorta extends Phaser.Scene {
   }
 
   static POS_PARAGEM_X = 1080; // onde o cliente pára, à frente da porta.
-  static POS_Y = 645;
+  static POS_Y = 680;
   static PORTA_X = 1635;        // para onde vai quando o deixamos entrar.
   static TEMPO_LIMITE = 5000;   // ms para decidir cada cliente.
 
@@ -20,6 +20,13 @@ class CenaPorta extends Phaser.Scene {
     this.load.image('fundo', 'src/assets/images/fundo.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
+    
+    // Carregar spritesheet de andar e imagem do cliente em pé
+    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', {
+      frameWidth: 250,
+      frameHeight: 428
+    });
+    this.load.image('cliente_parado', 'src/assets/images/cliente_parado.png');
   }
 
   // init() corre antes de create(). Garante que vidas/pontos existem no
@@ -55,6 +62,16 @@ class CenaPorta extends Phaser.Scene {
     // Setas: decisão (só atuam se houver cliente à espera).
     this.input.keyboard.on('keydown-LEFT', () => this.decidir('barrar'));
     this.input.keyboard.on('keydown-RIGHT', () => this.decidir('entrar'));
+
+    // Criar animação de andar do cliente se não existir
+    if (!this.anims.exists('andar')) {
+      this.anims.create({
+        key: 'andar',
+        frames: this.anims.generateFrameNumbers('cliente_andar', { start: 0, end: 3 }),
+        frameRate: 8,
+        repeat: -1
+      });
+    }
   }
 
   // ---------- Regras ----------
@@ -97,6 +114,7 @@ class CenaPorta extends Phaser.Scene {
     this.seguranca = this.add.image(X, Y, 'seguranca');
     // setScale com altura_alvo / altura_real mantém a proporção (não estica).
     this.seguranca.setScale(ALTURA / this.seguranca.height);
+    this.seguranca.setDepth(5);
   }
 
   // ---------- Quadro de regras (canto sup. esq.) ----------
@@ -213,6 +231,7 @@ class CenaPorta extends Phaser.Scene {
       ease: 'Linear',
       // Só ao chegar é que se pode decidir — e arranca o timer.
       onComplete: () => {
+        this.cliente.parar();
         this.aDecidir = true;
         this.iniciarTimer();
       },
@@ -259,7 +278,10 @@ class CenaPorta extends Phaser.Scene {
     const a = this.cliente.atributos;
     const deveEntrar = this.regras.every((r) => r.check(a));
     const deixouEntrar = acao === 'entrar';
-    const correta = deveEntrar === deixouEntrar;
+    
+    // Descomentar a linha abaixo se quiseres voltar a aplicar as regras:
+    // const correta = deveEntrar === deixouEntrar;
+    const correta = true; // Por agora, sem qualquer regra
 
     if (deixouEntrar) this.entrarPelaPorta(this.cliente);
     else this.voltarParaRua(this.cliente);
@@ -294,6 +316,7 @@ class CenaPorta extends Phaser.Scene {
   }
 
   entrarPelaPorta(cliente) {
+    cliente.andar();
     this.tweens.add({
       targets: cliente, x: CenaPorta.PORTA_X, scale: 0.6, alpha: 0,
       duration: 800, ease: 'Cubic.easeIn',
@@ -301,6 +324,10 @@ class CenaPorta extends Phaser.Scene {
   }
 
   voltarParaRua(cliente) {
+    cliente.andar();
+    if (cliente.sprite) {
+      cliente.sprite.setFlipX(true);
+    }
     this.tweens.add({
       targets: cliente, x: -200, alpha: 0,
       duration: 800, ease: 'Cubic.easeIn',

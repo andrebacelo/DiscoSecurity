@@ -4,6 +4,7 @@
 const config = {
   type: Phaser.AUTO,
   parent: 'game',
+  pixelArt: true,
   backgroundColor: '#1d1d2b',
   // Scale Manager: a resolução interna é 1280x720 (nítida), e o FIT estica
   // para caber na janela mantendo a proporção; CENTER_BOTH centra o canvas.

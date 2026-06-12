@@ -13,29 +13,46 @@ class Cliente extends Phaser.GameObjects.Container {
     // Fica guardado em this.atributos para a lógica de regras (passo 3) ler.
     this.atributos = Cliente.gerarAtributos();
 
-    // Placeholders (sem arte ainda). Coordenadas relativas ao container:
-    // (0,0) é o centro do cliente.
-    // Cabeça redonda — só para ler como "pessoa" em vez de cubo.
-    const cabeca = scene.add.circle(0, -210, 48, 0xffe0b0);
-    // Corpo. A origem do rectangle é o centro por defeito.
-    const corpo = scene.add
-      .rectangle(0, 0, 180, 315, 0x4cc9f0)
-      .setStrokeStyle(3, 0xffffff);
+    // Sprite do cliente. Posicionado para que a base (pés) fique alinhada.
+    // Usamos origem (0.5, 1) para que as transformações de textura mantenham a base no mesmo sítio.
+    this.sprite = scene.add.sprite(0, 240, 'cliente_andar');
+    this.sprite.setOrigin(0.5, 1);
 
     // Legenda com os atributos, por baixo do corpo.
     // setOrigin(0.5, 0): centrado na horizontal, a começar no topo do texto.
     const a = this.atributos;
-    const legenda = scene.add.text(
-      0, 188,
+    this.legenda = scene.add.text(
+      -250, 170,
       `Idade: ${a.idade}\nCalçado: ${a.calcado}\nChapéu: ${a.chapeu ? 'sim' : 'não'}`,
       { fontSize: '30px', color: '#ffffff', align: 'center' }
     ).setOrigin(0.5, 0);
 
     // add() mete os filhos DENTRO do container.
-    this.add([cabeca, corpo, legenda]);
+    this.add([this.sprite, this.legenda]);
+
+    // Inicia com o estado de andar
+    this.andar();
 
     // add.existing() regista o container na cena. Sem isto, nada aparece.
     scene.add.existing(this);
+  }
+
+  // Ativa a animação de andar
+  andar() {
+    this.sprite.setTexture('cliente_andar');
+    this.sprite.setOrigin(0.5, 1);
+    this.sprite.setScale(0.9);
+    this.sprite.play('andar');
+    if (this.legenda) this.legenda.setVisible(false);
+  }
+
+  // Pára a animação de andar e mostra a sprite de frente
+  parar() {
+    this.sprite.stop();
+    this.sprite.setTexture('cliente_parado');
+    this.sprite.setOrigin(0.5, 1);
+    this.sprite.setScale(0.9);
+    if (this.legenda) this.legenda.setVisible(true);
   }
 
   // Método static: pertence à classe, não a uma instância. Útil como "fábrica"
