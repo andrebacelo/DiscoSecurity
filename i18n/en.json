@@ -8,7 +8,11 @@
   "opcoes_lingua": "LANGUAGE",
   "lingua_nome": "ENGLISH",
   "opcoes_clica": "click the lines to change",
+  "opcoes_como_jogar": "HOW TO PLAY",
   "opcoes_voltar": "BACK",
+
+  "comojogar_titulo": "HOW TO PLAY",
+  "comojogar_texto": "DOOR PHASE\nRead the rules in the corner and decide in time:\n←  DENY        →  LET IN\nCorrect = a point. Wrong = lose a life.\n\nCHASE PHASE\nLet a banned one in? Catch them!\nMove: ← →  or  A D       Jump: SPACE\nCatch them before the exit to get the life back.\n\nESC pauses.    No lives = Game Over.",
 
   "dif_facil": "EASY",
   "dif_normal": "NORMAL",

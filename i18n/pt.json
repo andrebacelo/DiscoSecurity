@@ -8,7 +8,11 @@
   "opcoes_lingua": "LÍNGUA",
   "lingua_nome": "PORTUGUÊS",
   "opcoes_clica": "clica nas linhas para mudar",
+  "opcoes_como_jogar": "COMO JOGAR",
   "opcoes_voltar": "VOLTAR",
+
+  "comojogar_titulo": "COMO JOGAR",
+  "comojogar_texto": "FASE PORTA\nLê as regras no canto e decide a tempo:\n←  BARRAR        →  DEIXAR ENTRAR\nAcertar dá um ponto. Errar tira uma vida.\n\nFASE PERSEGUIÇÃO\nDeixaste entrar um proibido? Apanha-o!\nMover: ← →  ou  A D       Saltar: ESPAÇO\nApanha-o antes da saída e recuperas a vida.\n\nESC pausa o jogo.    Sem vidas = Game Over.",
 
   "dif_facil": "FÁCIL",
   "dif_normal": "NORMAL",

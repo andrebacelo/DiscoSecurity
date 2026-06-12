@@ -56,6 +56,7 @@ class CenaPorta extends Phaser.Scene {
     this.construirTimer();
     this.construirMenu();
     this.construirPainelOpcoes();
+    this.construirPainelComoJogar();
 
     // Ao voltar da perseguição (resume), o HUD pode estar desatualizado —
     // apanhar o intruso devolve uma vida e ninguém redesenhou os corações.
@@ -218,29 +219,53 @@ class CenaPorta extends Phaser.Scene {
   // Um painel central escondido. Por agora tem uma opção real: a DIFICULDADE,
   // que muda o tempo para decidir (porta) e a velocidade do intruso (perseguição).
   construirPainelOpcoes() {
-    const fundo = this.add.rectangle(960, 540, 860, 460, 0x12121a, 0.95)
-      .setStrokeStyle(3, 0x55557a);
-    const titulo = this.add.text(960, 380, I18N.t('opcoes_titulo'), {
+    // setInteractive() no fundo = painel "modal": apanha os cliques para não
+    // passarem para os botões do menu por baixo.
+    const fundo = this.add.rectangle(960, 540, 860, 520, 0x12121a, 0.95)
+      .setStrokeStyle(3, 0x55557a).setInteractive();
+    const titulo = this.add.text(960, 340, I18N.t('opcoes_titulo'), {
       fontFamily: CenaPorta.FONTE, fontSize: '30px', color: '#ffd166',
     }).setOrigin(0.5);
 
     // Linha da dificuldade: cada clique roda fácil→normal→difícil.
-    this.labelDificuldade = this.criarLinhaOpcao(960, 480, () => this.mudarDificuldade());
+    this.labelDificuldade = this.criarLinhaOpcao(960, 440, () => this.mudarDificuldade());
 
     // Linha da língua: cada clique alterna PT↔EN.
-    this.labelLingua = this.criarLinhaOpcao(960, 555, () => this.mudarLingua());
+    this.labelLingua = this.criarLinhaOpcao(960, 505, () => this.mudarLingua());
 
-    const nota = this.add.text(960, 615, I18N.t('opcoes_clica'), {
+    const nota = this.add.text(960, 550, I18N.t('opcoes_clica'), {
       fontFamily: CenaPorta.FONTE, fontSize: '14px', color: '#888899',
     }).setOrigin(0.5);
 
-    // VOLTAR usa o botão padrão do jogo (moldura rosa), centrado.
-    const voltar = this.criarOpcao(960, 695, I18N.t('opcoes_voltar'),
+    // Botões padrão (moldura rosa), centrados.
+    const comoJogar = this.criarOpcao(960, 630, I18N.t('opcoes_como_jogar'),
+      () => this.abrirComoJogar(), true);
+    const voltar = this.criarOpcao(960, 730, I18N.t('opcoes_voltar'),
       () => this.fecharOpcoes(), true);
 
     this.painelOpcoes = this.add.container(0, 0,
-      [fundo, titulo, this.labelDificuldade, this.labelLingua, nota, voltar]);
+      [fundo, titulo, this.labelDificuldade, this.labelLingua, nota, comoJogar, voltar]);
     this.painelOpcoes.setDepth(30).setVisible(false);
+  }
+
+  // Painel "COMO JOGAR" — abre POR CIMA do das opções (depth maior). O fundo
+  // é interativo (modal): não deixa clicar no painel de opções por baixo.
+  construirPainelComoJogar() {
+    const fundo = this.add.rectangle(960, 540, 1180, 640, 0x12121a, 0.98)
+      .setStrokeStyle(3, 0xfe00bf).setInteractive();
+    const titulo = this.add.text(960, 290, I18N.t('comojogar_titulo'), {
+      fontFamily: CenaPorta.FONTE, fontSize: '30px', color: '#ffd166',
+    }).setOrigin(0.5);
+    // align:'center' + \n no JSON dão o bloco de instruções já formatado.
+    const texto = this.add.text(960, 530, I18N.t('comojogar_texto'), {
+      fontFamily: CenaPorta.FONTE, fontSize: '16px', color: '#dcdcff',
+      align: 'center', lineSpacing: 14,
+    }).setOrigin(0.5);
+    const voltar = this.criarOpcao(960, 790, I18N.t('opcoes_voltar'),
+      () => this.fecharComoJogar(), true);
+
+    this.painelComoJogar = this.add.container(0, 0, [fundo, titulo, texto, voltar]);
+    this.painelComoJogar.setDepth(40).setVisible(false);
   }
 
   // Linha de definição clicável do painel (texto que muda ao clicar).
@@ -264,6 +289,17 @@ class CenaPorta extends Phaser.Scene {
   fecharOpcoes() {
     this.estado = 'menu';
     this.painelOpcoes.setVisible(false);
+  }
+
+  abrirComoJogar() {
+    if (this.estado !== 'opcoes') return;
+    this.estado = 'comojogar'; // o painel de opções fica por baixo
+    this.painelComoJogar.setVisible(true);
+  }
+
+  fecharComoJogar() {
+    this.estado = 'opcoes'; // volta para o painel de opções
+    this.painelComoJogar.setVisible(false);
   }
 
   mudarDificuldade() {
