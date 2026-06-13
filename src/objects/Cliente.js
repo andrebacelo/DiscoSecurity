@@ -14,17 +14,18 @@ class Cliente extends Phaser.GameObjects.Container {
     this.atributos = Cliente.gerarAtributos();
 
     // Sprite do cliente. Posicionado para que a base (pés) fique alinhada.
-    // Usamos origem (0.5, 1) para que as transformações de textura mantenham a base no mesmo sítio.
-    this.sprite = scene.add.sprite(0, 240, 'cliente_andar');
+    // Container Y=710, sprite local Y=220 → pés no mundo a Y=930 (chão).
+    // Dimensões reais: andar 356x593/frame, parado 489x1163.
+    this.sprite = scene.add.sprite(0, 220, 'cliente_andar');
     this.sprite.setOrigin(0.5, 1);
 
     // Legenda com os atributos, por baixo do corpo.
-    // setOrigin(0.5, 0): centrado na horizontal, a começar no topo do texto.
     const a = this.atributos;
     this.legenda = scene.add.text(
-      -250, 170,
+      0, 230,
       `Idade: ${a.idade}\nCalçado: ${a.calcado}\nChapéu: ${a.chapeu ? 'sim' : 'não'}`,
-      { fontSize: '30px', color: '#ffffff', align: 'center' }
+      { fontSize: '26px', color: '#ffffff', align: 'center',
+        backgroundColor: '#12121acc', padding: { x: 12, y: 6 } }
     ).setOrigin(0.5, 0);
 
     // add() mete os filhos DENTRO do container.
@@ -41,7 +42,7 @@ class Cliente extends Phaser.GameObjects.Container {
   andar() {
     this.sprite.setTexture('cliente_andar');
     this.sprite.setOrigin(0.5, 1);
-    this.sprite.setScale(0.9);
+    this.sprite.setScale(0.6); // 356x593 → ~214x356 em ecrã
     this.sprite.play('andar');
     if (this.legenda) this.legenda.setVisible(false);
   }
@@ -51,7 +52,7 @@ class Cliente extends Phaser.GameObjects.Container {
     this.sprite.stop();
     this.sprite.setTexture('cliente_parado');
     this.sprite.setOrigin(0.5, 1);
-    this.sprite.setScale(0.9);
+    this.sprite.setScale(0.3); // 489x1163 → ~147x349 em ecrã
     if (this.legenda) this.legenda.setVisible(true);
   }
 

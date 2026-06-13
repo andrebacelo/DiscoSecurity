@@ -9,22 +9,22 @@ class CenaPorta extends Phaser.Scene {
     super('CenaPorta');
   }
 
-  static POS_PARAGEM_X = 1080; // onde o cliente pára, à frente da porta.
-  static POS_Y = 680;
-  static PORTA_X = 1635;        // para onde vai quando o deixamos entrar.
+  static POS_PARAGEM_X = 1050; // onde o cliente pára, à frente da porta.
+  static POS_Y = 680;           // container Y — pés ficam a ~900 (chão).
+  static PORTA_X = 1300;        // para onde vai quando o deixamos entrar.
   static TEMPO_LIMITE = 5000;   // ms para decidir cada cliente.
 
   // preload() corre primeiro: carrega os ficheiros (imagens, som) para a
   // memória. 'fundo' é a chave; depois pedimos a imagem por esse nome.
   preload() {
     this.load.image('fundo', 'src/assets/images/fundo.png');
-    this.load.image('seguranca', 'src/assets/images/seguranca.png');
+    this.load.image('seguranca', 'src/assets/images/seguranca2.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
-    
+
     // Carregar spritesheet de andar e imagem do cliente em pé
     this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', {
-      frameWidth: 250,
-      frameHeight: 428
+      frameWidth: 356,
+      frameHeight: 593
     });
     this.load.image('cliente_parado', 'src/assets/images/cliente_parado.png');
   }
@@ -82,8 +82,8 @@ class CenaPorta extends Phaser.Scene {
     return [
       { label: 'Idade mínima: 18', check: (a) => a.idade >= 18 },
       { label: 'Idade mínima: 21', check: (a) => a.idade >= 21 },
-      { label: 'Proibido: crocs',  check: (a) => a.calcado !== 'crocs' },
-      { label: 'Proibido: botas',  check: (a) => a.calcado !== 'botas' },
+      { label: 'Proibido: crocs', check: (a) => a.calcado !== 'crocs' },
+      { label: 'Proibido: botas', check: (a) => a.calcado !== 'botas' },
       { label: 'Proibido: chapéu', check: (a) => !a.chapeu },
     ];
   }
@@ -107,11 +107,12 @@ class CenaPorta extends Phaser.Scene {
   // ---------- Segurança (imagem, à direita junto à porta) ----------
   construirSeguranca() {
     // Para afinares: muda o X (esq./dir.), o Y (cima/baixo) e a ALTURA.
-    const X = 1450;
-    const Y = 770;
-    const ALTURA = 700;
+    const X = 1350;   // à direita da porta
+    const Y = 990;    // pés no chão (nível real do passeio)
+    const ALTURA = 450; // altura alvo em pixels
 
     this.seguranca = this.add.image(X, Y, 'seguranca');
+    this.seguranca.setOrigin(0.5, 1); // âncora nos pés para alinhar com o chão
     // setScale com altura_alvo / altura_real mantém a proporção (não estica).
     this.seguranca.setScale(ALTURA / this.seguranca.height);
     this.seguranca.setDepth(5);
@@ -156,10 +157,14 @@ class CenaPorta extends Phaser.Scene {
 
   // ---------- Barra de tempo (por cima do cliente) ----------
   construirTimer() {
-    const fundo = this.add.rectangle(1080, 300, 400, 30, 0x333344)
+    // Centrada no POS_PARAGEM_X, acima da cabeça do cliente.
+    const timerX = CenaPorta.POS_PARAGEM_X;
+    const timerY = 440;
+    const timerW = 350;
+    const fundo = this.add.rectangle(timerX, timerY, timerW, 24, 0x333344)
       .setStrokeStyle(2, 0x888899).setDepth(2);
     // Origem à esquerda: ao reduzir scaleX, a barra encolhe da direita p/ a esq.
-    this.barraTempo = this.add.rectangle(880, 300, 400, 30, 0x4cc9f0)
+    this.barraTempo = this.add.rectangle(timerX - timerW / 2, timerY, timerW, 24, 0x4cc9f0)
       .setOrigin(0, 0.5).setDepth(2);
 
     this.uiJogo.push(fundo, this.barraTempo);
@@ -169,13 +174,14 @@ class CenaPorta extends Phaser.Scene {
   construirMenu() {
     // Título: a imagem do logótipo. setOrigin(0,0) = ancorado no canto sup. esq.
     // Para afinares: muda X, Y e a ESCALA (1 = tamanho original).
+    // titulo.png agora é 1200x265 — escalar para caber bem no menu.
     const titulo = this.add.image(90, 90, 'titulo').setOrigin(0, 0);
-    titulo.setScale(1.2);
+    titulo.setScale(0.6);
 
     // Opções: texto a sério → clicável (e traduzível PT/EN depois).
-    const jogar  = this.criarOpcao(120, 620, 'JOGAR',  () => this.iniciarJogo());
-    const opcoes = this.criarOpcao(120, 740, 'OPÇÕES', () => {}); // TODO: opções
-    const sair   = this.criarOpcao(120, 860, 'QUIT',   () => {}); // TODO
+    const jogar = this.criarOpcao(120, 620, 'JOGAR', () => this.iniciarJogo());
+    const opcoes = this.criarOpcao(120, 740, 'OPÇÕES', () => { }); // TODO: opções
+    const sair = this.criarOpcao(120, 860, 'QUIT', () => { }); // TODO
 
     // Agrupo título + opções para subir o menu todo de uma vez no JOGAR.
     this.menu = this.add.container(0, 0, [titulo, jogar, opcoes, sair]);
@@ -191,7 +197,7 @@ class CenaPorta extends Phaser.Scene {
     op.setInteractive({ useHandCursor: true }); // clicável + cursor de mão
     op.on('pointerdown', aoClicar);
     op.on('pointerover', () => op.setColor('#ffd166')); // realce ao passar o rato
-    op.on('pointerout',  () => op.setColor('#ffffff'));
+    op.on('pointerout', () => op.setColor('#ffffff'));
     return op;
   }
 
@@ -278,7 +284,7 @@ class CenaPorta extends Phaser.Scene {
     const a = this.cliente.atributos;
     const deveEntrar = this.regras.every((r) => r.check(a));
     const deixouEntrar = acao === 'entrar';
-    
+
     // Descomentar a linha abaixo se quiseres voltar a aplicar as regras:
     // const correta = deveEntrar === deixouEntrar;
     const correta = true; // Por agora, sem qualquer regra
