@@ -46,7 +46,7 @@ class Cliente extends Phaser.GameObjects.Container {
       idade: Phaser.Math.Between(14, 30),
       // GetRandom() escolhe um item aleatório do array.
       calcado: Phaser.Utils.Array.GetRandom(['crocs', 'ténis', 'botas']),
-      // 0 ou 1 → false/true.
+      // 0 ou 1 -> false/true.
       chapeu: Phaser.Math.Between(0, 1) === 1,
     };
   }

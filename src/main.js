@@ -1,5 +1,5 @@
 // Configuração do jogo e registo de cenas.
-// O menu deixou de ser uma cena própria — agora é uma camada da CenaPorta,
+// O menu deixou de ser uma cena própria, agora é uma camada da CenaPorta,
 // por isso o jogo arranca diretamente na CenaPorta.
 const config = {
   type: Phaser.AUTO,
@@ -21,8 +21,12 @@ const config = {
       debug: false,
     },
   },
-  // A primeira do array é a que arranca. CenaPorta abre já no estado de menu.
-  scene: [CenaPorta, GameOverScene],
+  // A primeira do array é a que arranca. Por defeito é a CenaPorta (menu).
+  // Atalho de DESENVOLVIMENTO: abrir com "?cena=perseguicao" no URL faz o jogo
+  // arrancar direto na perseguição, para a testar sem passar pela porta.
+  scene: new URLSearchParams(location.search).get('cena') === 'perseguicao'
+    ? [CenaPerseguicao, CenaPorta, CenaPausa, GameOverScene]
+    : [CenaPorta, CenaPerseguicao, CenaPausa, GameOverScene],
 };
 
 // Esperamos a fonte pixel carregar ANTES de criar o jogo. Razão: o Phaser

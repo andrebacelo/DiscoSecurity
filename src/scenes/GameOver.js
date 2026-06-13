@@ -4,24 +4,31 @@ class GameOverScene extends Phaser.Scene {
     super('GameOverScene');
   }
 
+  preload() {
+    // Traduções (já em cache em jogo normal; o loader não repete).
+    this.load.json('i18n-pt', 'i18n/pt.json');
+    this.load.json('i18n-en', 'i18n/en.json');
+  }
+
   // Recebe os dados passados no scene.start(..., { score }).
   init(data) {
     this.finalScore = data.score || 0;
   }
 
   create() {
+    I18N.carregar(this);
     this.cameras.main.setBackgroundColor('#15151f');
 
-    this.add.text(960, 380, 'GAME OVER', {
-      fontSize: '120px', color: '#ff6666', fontStyle: 'bold',
+    this.add.text(960, 380, I18N.t('go_titulo'), {
+      fontFamily: '"Press Start 2P"', fontSize: '90px', color: '#ff6666',
     }).setOrigin(0.5);
 
-    this.add.text(960, 540, `Pontos finais: ${this.finalScore}`, {
-      fontSize: '56px', color: '#ffffff',
+    this.add.text(960, 540, I18N.t('go_pontos') + this.finalScore, {
+      fontFamily: '"Press Start 2P"', fontSize: '40px', color: '#ffffff',
     }).setOrigin(0.5);
 
-    this.add.text(960, 700, 'Pressiona ESPAÇO para recomeçar', {
-      fontSize: '40px', color: '#a8e6a3',
+    this.add.text(960, 700, I18N.t('go_reiniciar'), {
+      fontFamily: '"Press Start 2P"', fontSize: '24px', color: '#a8e6a3',
     }).setOrigin(0.5);
 
     // Volta à CenaPorta, que abre no estado de menu.
