@@ -21,13 +21,12 @@ class CenaPerseguicao extends Phaser.Scene {
   static GRAVIDADE     = 1200;  // puxa para baixo nesta cena
   static VEL_SEGURANCA = 360;   // velocidade horizontal do jogador
   static VEL_SALTO     = 850;   // impulso do salto (para cima)
-  static TEMPO_FASE    = 12000; // ms para apanhar o intruso
   static SOLO_TOPO_Y   = 1000;  // altura do chão (topo da superfície)
   static FONTE = '"Press Start 2P"';
 
   // Velocidade do intruso por dificuldade (a dificuldade vive no registry,
   // escolhida nas OPÇÕES do menu).
-  static VEL_INTRUSO = { facil: 170, normal: 190, dificil: 215 };
+  static VEL_INTRUSO = { facil: 150, normal: 195, dificil: 250 };
 
   // Tipos de obstáculo: proporções e cores diferentes leem-se como coisas
   // diferentes no ecrã (caixa, coluna alta e estreita, mesa baixa e larga).
@@ -94,7 +93,8 @@ class CenaPerseguicao extends Phaser.Scene {
     this.intruso.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.intruso, this.chao);
     const dif = this.registry.get('dificuldade');
-    this.intruso.body.setVelocityX(CenaPerseguicao.VEL_INTRUSO[dif] || 190);
+    this.velIntruso = CenaPerseguicao.VEL_INTRUSO[dif] || 195;
+    this.intruso.body.setVelocityX(this.velIntruso);
 
     // Etiqueta com a infração por cima do intruso (segue-o no update).
     // A CenaPorta envia CHAVES de tradução; o texto final sai do I18N.
@@ -126,7 +126,11 @@ class CenaPerseguicao extends Phaser.Scene {
     });
 
     // (9) HUD: tempo (centro), vidas (esquerda) e dica (rodapé).
-    this.tempoRestante = CenaPerseguicao.TEMPO_FASE;
+    // O tempo é CALCULADO: distância até à saída ÷ velocidade do intruso, por
+    // isso o contador chega a 0 mesmo quando ele foge. No difícil ele é mais
+    // rápido => menos tempo. distFuga = espaço até os bordos se tocarem.
+    const distFuga = (this.saida.x - this.saida.width / 2) - (this.intruso.x + this.intruso.width / 2);
+    this.tempoRestante = (distFuga / this.velIntruso) * 1000;
     this.hud = this.add.text(960, 60, '', {
       fontFamily: CenaPerseguicao.FONTE, fontSize: '26px', color: '#ffd166',
       backgroundColor: '#12121acc', padding: { x: 14, y: 10 },
