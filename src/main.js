@@ -33,6 +33,7 @@ const config = {
 // desenha o texto numa textura no momento em que a cena arranca; se a fonte
 // ainda não estiver pronta, usa a do sistema e não volta a corrigir.
 async function arrancarJogo() {
+  Som.carregar(); // lê os volumes guardados (música/efeitos) antes de arrancar
   try {
     await document.fonts.load('16px "Press Start 2P"');
     await document.fonts.ready;

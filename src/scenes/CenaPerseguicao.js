@@ -86,9 +86,10 @@ class CenaPerseguicao extends Phaser.Scene {
     const mm = this.registry.get('musMenu'); if (mm) mm.pause();
     let mc = this.registry.get('musChase');
     if (!mc) {
-      mc = this.sound.add('musica-perseguicao', { loop: true, volume: 0.1 });
+      mc = this.sound.add('musica-perseguicao', { loop: true });
       this.registry.set('musChase', mc);
     }
+    mc.setVolume(Som.volMusicaFaixa('musica-perseguicao')); // volume atual das opções
     mc.play();
 
     // fundo interior da disco
@@ -244,7 +245,7 @@ class CenaPerseguicao extends Phaser.Scene {
     const querSaltar = this.cursores.up.isDown || this.teclas.W.isDown || this.teclas.SPACE.isDown;
     if (querSaltar && corpo.blocked.down) {
       corpo.setVelocityY(-CenaPerseguicao.VEL_SALTO);
-      this.sound.play('salto', { volume: 0.5 });
+      Som.efeito(this, 'salto', 0.5);
     }
 
     // A etiqueta da infração segue o intruso.
@@ -334,7 +335,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.podeLevarEmpurrao = false;
     seguranca.body.setVelocityX(-420); // atira para trás
     seguranca.body.setVelocityY(-260); // e um pouco para cima
-    this.sound.play('bonk', { volume: 0.9 });
+    Som.efeito(this, 'bonk', 0.9);
     this.cameras.main.shake(120, 0.004);
     this.time.delayedCall(600, () => { this.podeLevarEmpurrao = true; });
   }
@@ -345,7 +346,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.resolvido = true;
     this.registry.set('vidas', this.registry.get('vidas') + 1);
     this.atualizarVidas();
-    this.sound.play('apanhar', { volume: 1 });
+    Som.efeito(this, 'apanhar', 1);
     this.mostrarResultado(I18N.t('chase_apanhaste'), '#a8e6a3');
   }
 
@@ -354,7 +355,7 @@ class CenaPerseguicao extends Phaser.Scene {
   escapou() {
     if (this.resolvido) return;
     this.resolvido = true;
-    this.sound.play('escapou', { volume: 0.9 });
+    Som.efeito(this, 'escapou', 0.9);
     this.mostrarResultado(I18N.t('chase_escapou'), '#ff6b6b');
   }
 

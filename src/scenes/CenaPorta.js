@@ -225,30 +225,31 @@ class CenaPorta extends Phaser.Scene {
   construirPainelOpcoes() {
     // setInteractive() no fundo = painel "modal": apanha os cliques para não
     // passarem para os botões do menu por baixo.
-    const fundo = this.add.rectangle(960, 540, 860, 520, 0x12121a, 0.95)
+    const fundo = this.add.rectangle(960, 540, 900, 620, 0x12121a, 0.95)
       .setStrokeStyle(3, 0x55557a).setInteractive();
-    const titulo = this.add.text(960, 340, I18N.t('opcoes_titulo'), {
+    const titulo = this.add.text(960, 300, I18N.t('opcoes_titulo'), {
       fontFamily: CenaPorta.FONTE, fontSize: '30px', color: '#ffd166',
     }).setOrigin(0.5);
 
-    // Linha da dificuldade: cada clique roda fácil→normal→difícil.
-    this.labelDificuldade = this.criarLinhaOpcao(960, 440, () => this.mudarDificuldade());
+    // Linhas clicáveis: cada clique avança a opção (e dá a volta no fim).
+    this.labelDificuldade = this.criarLinhaOpcao(960, 372, () => this.mudarDificuldade());
+    this.labelLingua      = this.criarLinhaOpcao(960, 424, () => this.mudarLingua());
+    this.labelMusica      = this.criarLinhaOpcao(960, 476, () => this.mudarMusica());
+    this.labelEfeitos     = this.criarLinhaOpcao(960, 528, () => this.mudarEfeitos());
 
-    // Linha da língua: cada clique alterna PT↔EN.
-    this.labelLingua = this.criarLinhaOpcao(960, 505, () => this.mudarLingua());
-
-    const nota = this.add.text(960, 550, I18N.t('opcoes_clica'), {
+    const nota = this.add.text(960, 575, I18N.t('opcoes_clica'), {
       fontFamily: CenaPorta.FONTE, fontSize: '14px', color: '#888899',
     }).setOrigin(0.5);
 
     // Botões padrão (moldura rosa), centrados.
-    const comoJogar = this.criarOpcao(960, 630, I18N.t('opcoes_como_jogar'),
+    const comoJogar = this.criarOpcao(960, 648, I18N.t('opcoes_como_jogar'),
       () => this.abrirComoJogar(), true);
-    const voltar = this.criarOpcao(960, 730, I18N.t('opcoes_voltar'),
+    const voltar = this.criarOpcao(960, 748, I18N.t('opcoes_voltar'),
       () => this.fecharOpcoes(), true);
 
     this.painelOpcoes = this.add.container(0, 0,
-      [fundo, titulo, this.labelDificuldade, this.labelLingua, nota, comoJogar, voltar]);
+      [fundo, titulo, this.labelDificuldade, this.labelLingua, this.labelMusica,
+       this.labelEfeitos, nota, comoJogar, voltar]);
     this.painelOpcoes.setDepth(30).setVisible(false);
   }
 
@@ -278,7 +279,7 @@ class CenaPorta extends Phaser.Scene {
       fontFamily: CenaPorta.FONTE, fontSize: '24px', color: '#ffffff',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     linha.on('pointerdown', () => {
-      if (this.cache.audio.exists('ui-click')) this.sound.play('ui-click', { volume: 0.8 });
+      Som.efeito(this, 'ui-click', 0.8);
       aoClicar();
     });
     linha.on('pointerover', () => linha.setColor('#ffd166'));
@@ -323,6 +324,22 @@ class CenaPorta extends Phaser.Scene {
     this.scene.restart({ reabrirOpcoes: true });
   }
 
+  // Volume da música: avança o nível, guarda e aplica já às músicas a tocar.
+  mudarMusica() {
+    Som.musica = Som.proximo(Som.musica);
+    Som.guardar();
+    Som.aplicarMusica(this.registry.get('musMenu'));
+    Som.aplicarMusica(this.registry.get('musChase'));
+    this.atualizarLinhasOpcoes();
+  }
+
+  // Volume dos efeitos: avança o nível e guarda (o próximo SFX já sai assim).
+  mudarEfeitos() {
+    Som.efeitos = Som.proximo(Som.efeitos);
+    Som.guardar();
+    this.atualizarLinhasOpcoes();
+  }
+
   atualizarLinhasOpcoes() {
     const d = this.registry.get('dificuldade');
     const seg = (CenaPorta.TEMPOS[d] / 1000).toString()
@@ -330,6 +347,8 @@ class CenaPorta extends Phaser.Scene {
     this.labelDificuldade.setText(I18N.t('opcoes_dificuldade') + ':  '
       + I18N.t('dif_' + d) + '  (' + seg + 's)');
     this.labelLingua.setText(I18N.t('opcoes_lingua') + ':  ' + I18N.t('lingua_nome'));
+    this.labelMusica.setText(I18N.t('opcoes_musica') + ':  ' + Som.percent(Som.musica));
+    this.labelEfeitos.setText(I18N.t('opcoes_efeitos') + ':  ' + Som.percent(Som.efeitos));
   }
 
   // ---------- QUIT ----------
@@ -499,9 +518,10 @@ class CenaPorta extends Phaser.Scene {
   arrancarMusicaMenu() {
     let m = this.registry.get('musMenu');
     if (!m) {
-      m = this.sound.add('musica-menu', { loop: true, volume: 0.2 });
+      m = this.sound.add('musica-menu', { loop: true });
       this.registry.set('musMenu', m);
     }
+    m.setVolume(Som.volMusicaFaixa('musica-menu')); // volume atual das opções
     if (m.isPlaying) return;
     if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, () => m.play());
     else m.play();

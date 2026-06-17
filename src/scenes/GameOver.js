@@ -19,7 +19,7 @@ class GameOverScene extends Phaser.Scene {
   create() {
     I18N.carregar(this);
     this.cameras.main.setBackgroundColor('#15151f');
-    this.sound.play('gameover', { volume: 0.9 });
+    Som.efeito(this, 'gameover', 0.9);
 
     this.add.text(960, 380, I18N.t('go_titulo'), {
       fontFamily: '"Press Start 2P"', fontSize: '90px', color: '#ff6666',
