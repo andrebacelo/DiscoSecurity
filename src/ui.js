@@ -25,7 +25,7 @@ const UI = {
     moldura.setInteractive({ useHandCursor: true });
     moldura.on('pointerdown', () => {
       // Som do clique (se estiver carregado nesta cena).
-      if (cena.cache.audio.exists('ui-click')) cena.sound.play('ui-click', { volume: 0.8 });
+      Som.efeito(cena, 'ui-click', 0.8);
       aoClicar();
     });
     moldura.on('pointerover', () => {
