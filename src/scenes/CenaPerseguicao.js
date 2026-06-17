@@ -50,6 +50,12 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.image('obs-caixa1', 'src/assets/images/obs-caixa1.png');   // caixa única → obstáculo
     this.load.image('obs-mesa', 'src/assets/images/obs-mesa.png');
     this.load.image('plataforma', 'src/assets/images/plataforma.png');
+    // Sons da perseguição.
+    this.load.audio('salto', 'src/assets/audio/salto.mp3');
+    this.load.audio('bonk', 'src/assets/audio/bonk.mp3');
+    this.load.audio('apanhar', 'src/assets/audio/apanhar.mp3');
+    this.load.audio('escapou', 'src/assets/audio/escapou.mp3');
+    this.load.audio('musica-perseguicao', 'src/assets/audio/musica-perseguicao.mp3');
     // Traduções (necessário para o modo de teste ?cena=perseguicao;
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
@@ -75,6 +81,15 @@ class CenaPerseguicao extends Phaser.Scene {
 
     // (1) GRAVIDADE PRÓPRIA desta cena. A config global tem y:0; aqui ligamos.
     this.physics.world.gravity.y = CenaPerseguicao.GRAVIDADE;
+
+    // Música: baixa (pausa) a do menu e toca a da perseguição em loop.
+    const mm = this.registry.get('musMenu'); if (mm) mm.pause();
+    let mc = this.registry.get('musChase');
+    if (!mc) {
+      mc = this.sound.add('musica-perseguicao', { loop: true, volume: 0.1 });
+      this.registry.set('musChase', mc);
+    }
+    mc.play();
 
     // fundo interior da disco
     this.add.image(960, 1080, 'fundo-disco').setOrigin(0.5, 1).setScale(1.25);
@@ -229,6 +244,7 @@ class CenaPerseguicao extends Phaser.Scene {
     const querSaltar = this.cursores.up.isDown || this.teclas.W.isDown || this.teclas.SPACE.isDown;
     if (querSaltar && corpo.blocked.down) {
       corpo.setVelocityY(-CenaPerseguicao.VEL_SALTO);
+      this.sound.play('salto', { volume: 0.5 });
     }
 
     // A etiqueta da infração segue o intruso.
@@ -318,6 +334,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.podeLevarEmpurrao = false;
     seguranca.body.setVelocityX(-420); // atira para trás
     seguranca.body.setVelocityY(-260); // e um pouco para cima
+    this.sound.play('bonk', { volume: 0.9 });
     this.cameras.main.shake(120, 0.004);
     this.time.delayedCall(600, () => { this.podeLevarEmpurrao = true; });
   }
@@ -328,6 +345,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.resolvido = true;
     this.registry.set('vidas', this.registry.get('vidas') + 1);
     this.atualizarVidas();
+    this.sound.play('apanhar', { volume: 1 });
     this.mostrarResultado(I18N.t('chase_apanhaste'), '#a8e6a3');
   }
 
@@ -336,6 +354,7 @@ class CenaPerseguicao extends Phaser.Scene {
   escapou() {
     if (this.resolvido) return;
     this.resolvido = true;
+    this.sound.play('escapou', { volume: 0.9 });
     this.mostrarResultado(I18N.t('chase_escapou'), '#ff6b6b');
   }
 
@@ -357,6 +376,8 @@ class CenaPerseguicao extends Phaser.Scene {
   }
 
   terminar() {
+    const mc = this.registry.get('musChase'); if (mc) mc.stop(); // pára a música da perseguição
+    const mm = this.registry.get('musMenu'); if (mm) mm.resume(); // retoma a do menu
     this.scene.stop();                 // fecha esta cena
     this.scene.resume('CenaPorta');    // retoma a fase porta onde estava
   }

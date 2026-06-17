@@ -8,6 +8,11 @@ class CenaPausa extends Phaser.Scene {
     super('CenaPausa');
   }
 
+  preload() {
+    // Som do clique (já em cache em jogo normal; o loader não repete).
+    this.load.audio('ui-click', 'src/assets/audio/ui-click.mp3');
+  }
+
   init(data) {
     this.cenaPausada = data.de; // 'CenaPorta' ou 'CenaPerseguicao'
   }
@@ -43,12 +48,15 @@ class CenaPausa extends Phaser.Scene {
     // Se a pausa veio da perseguição, a CenaPorta também está parada por
     // baixo (foi ela que lançou a perseguição) — há que fechar as duas.
     if (this.cenaPausada === 'CenaPerseguicao') {
+      const mc = this.registry.get('musChase'); if (mc) mc.stop(); // pára música da perseguição
       this.scene.stop('CenaPerseguicao');
       this.scene.stop('CenaPorta');
     } else {
       this.scene.stop('CenaPorta');
     }
-    // start() fecha esta cena e arranca a CenaPorta do zero (abre no menu).
-    this.scene.start('CenaPorta');
+    // start() fecha esta cena e arranca a CenaPorta do zero (abre no menu)
+    // — a CenaPorta.create volta a pôr a música do menu a tocar.
+    // reabrirOpcoes: false explícito (senão o Phaser reusa o data antigo).
+    this.scene.start('CenaPorta', { reabrirOpcoes: false });
   }
 }

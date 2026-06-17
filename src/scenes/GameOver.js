@@ -5,6 +5,7 @@ class GameOverScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio('gameover', 'src/assets/audio/gameover.mp3');
     // Traduções (já em cache em jogo normal; o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
     this.load.json('i18n-en', 'i18n/en.json');
@@ -18,6 +19,7 @@ class GameOverScene extends Phaser.Scene {
   create() {
     I18N.carregar(this);
     this.cameras.main.setBackgroundColor('#15151f');
+    this.sound.play('gameover', { volume: 0.9 });
 
     this.add.text(960, 380, I18N.t('go_titulo'), {
       fontFamily: '"Press Start 2P"', fontSize: '90px', color: '#ff6666',
@@ -33,7 +35,9 @@ class GameOverScene extends Phaser.Scene {
 
     // Volta à CenaPorta, que abre no estado de menu.
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('CenaPorta');
+      // reabrirOpcoes: false explícito — senão o Phaser reutiliza o data
+      // antigo (da troca de língua) e o menu abria com as opções abertas.
+      this.scene.start('CenaPorta', { reabrirOpcoes: false });
     });
   }
 }
