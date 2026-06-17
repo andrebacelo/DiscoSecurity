@@ -23,6 +23,8 @@ class CenaPorta extends Phaser.Scene {
     this.load.image('fundo', 'src/assets/images/fundo.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
+    this.load.audio('ui-click', 'src/assets/audio/ui-click.mp3'); // clique dos botões
+    this.load.audio('musica-menu', 'src/assets/audio/musica-menu.mp3'); // fundo do menu/porta
     // Traduções (uma por língua). O loader ignora se já estiverem na cache.
     this.load.json('i18n-pt', 'i18n/pt.json');
     this.load.json('i18n-en', 'i18n/en.json');
@@ -61,6 +63,8 @@ class CenaPorta extends Phaser.Scene {
     // Ao voltar da perseguição (resume), o HUD pode estar desatualizado —
     // apanhar o intruso devolve uma vida e ninguém redesenhou os corações.
     this.events.on('resume', () => this.atualizarHUD());
+
+    this.arrancarMusicaMenu(); // música de fundo do menu/porta (loop)
 
     // No arranque, a UI de jogo fica escondida (só aparece no JOGAR).
     this.uiJogo.forEach((o) => o.setVisible(false));
@@ -273,7 +277,10 @@ class CenaPorta extends Phaser.Scene {
     const linha = this.add.text(x, y, '', {
       fontFamily: CenaPorta.FONTE, fontSize: '24px', color: '#ffffff',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    linha.on('pointerdown', aoClicar);
+    linha.on('pointerdown', () => {
+      if (this.cache.audio.exists('ui-click')) this.sound.play('ui-click', { volume: 0.8 });
+      aoClicar();
+    });
     linha.on('pointerover', () => linha.setColor('#ffd166'));
     linha.on('pointerout',  () => linha.setColor('#ffffff'));
     return linha;
@@ -485,8 +492,25 @@ class CenaPorta extends Phaser.Scene {
     this.scene.launch('CenaPerseguicao', { atributos: a, infracoes });
   }
 
+  // ---------- Música de fundo ----------
+  // Loop do menu/porta. A instância vive no registry para sobreviver a
+  // reinícios da cena (troca de língua) sem duplicar. Os browsers bloqueiam
+  // áudio até à 1ª interação — se estiver "locked", arranca no 1º clique/tecla.
+  arrancarMusicaMenu() {
+    let m = this.registry.get('musMenu');
+    if (!m) {
+      m = this.sound.add('musica-menu', { loop: true, volume: 0.2 });
+      this.registry.set('musMenu', m);
+    }
+    if (m.isPlaying) return;
+    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, () => m.play());
+    else m.play();
+  }
+
   // ---------- Fim de jogo ----------
   gameOver() {
+    const m = this.registry.get('musMenu');
+    if (m) m.stop(); // pára a música do menu (o Game Over tem o seu som)
     this.scene.start('GameOverScene', { score: this.registry.get('pontos') });
   }
 }
