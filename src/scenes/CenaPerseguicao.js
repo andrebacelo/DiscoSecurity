@@ -28,19 +28,28 @@ class CenaPerseguicao extends Phaser.Scene {
   // escolhida nas OPÇÕES do menu).
   static VEL_INTRUSO = { facil: 150, normal: 195, dificil: 250 };
 
-  // Tipos de obstáculo: proporções e cores diferentes leem-se como coisas
-  // diferentes no ecrã (caixa, coluna alta e estreita, mesa baixa e larga).
-  // [min, max] de cada dimensão; todos saltáveis.
+  // Obstáculos do chão (saltáveis): cada um é um sprite com altura-alvo no
+  // jogo (a largura sai da proporção). Apogeu do salto ≈ 300px.
+  // hitW/hitH = fração da imagem que conta como colisão (o resto é brilho/ar).
   static TIPOS_OBSTACULO = [
-    { larg: [60, 95],   alt: [60, 95],   cor: 0xffa500 }, // caixa
-    { larg: [38, 55],   alt: [120, 175], cor: 0x9b59b6 }, // coluna
-    { larg: [130, 185], alt: [50, 70],   cor: 0x2ecc71 }, // mesa
+    { tex: 'obs-caixa1', altura: 100, hitW: 0.70, hitH: 0.78 }, // uma caixa
+    { tex: 'obs-mesa',   altura: 120, hitW: 0.86, hitH: 0.55 }, // mesa (baixa, larga)
   ];
+
+  // Muro (barreira alta a trepar): a coluna de som, escalada à altura.
+  // (array para ser fácil juntar mais variantes de muro no futuro.)
+  static TIPOS_MURO = ['obs-coluna'];
 
   // preload() carrega os ficheiros desta cena para a memória.
   preload() {
     this.load.image('fundo-disco', 'src/assets/images/fundo-disco.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
+    // Sprites do nível. As pilhas altas (coluna, caixa) servem de MURO;
+    // a caixa única e a mesa são os obstáculos do chão (saltáveis).
+    this.load.image('obs-coluna', 'src/assets/images/obs-coluna.png');   // coluna → muro
+    this.load.image('obs-caixa1', 'src/assets/images/obs-caixa1.png');   // caixa única → obstáculo
+    this.load.image('obs-mesa', 'src/assets/images/obs-mesa.png');
+    this.load.image('plataforma', 'src/assets/images/plataforma.png');
     // Traduções (necessário para o modo de teste ?cena=perseguicao;
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
@@ -104,9 +113,11 @@ class CenaPerseguicao extends Phaser.Scene {
       backgroundColor: '#c0392bdd', padding: { x: 8, y: 6 },
     }).setOrigin(0.5).setDepth(10);
 
-    // (6) SAÍDA: zona à direita. Se o intruso lá chegar, falhaste.
-    this.saida = this.add.rectangle(1860, 860, 70, 240, 0x2ecc71, 0.35);
+    // (6) ZONA DE FUGA: o intruso "perde-se na pista". Encostada à direita
+    // (zona de colisão invisível) para a fuga só contar quase no fim do ecrã.
+    this.saida = this.add.rectangle(1900, 540, 40, 1080, 0x000000, 0); // invisível
     this.physics.add.existing(this.saida, true);          // 'true' = estático
+    this.criarFeixe();                                    // brilho da pista (visual)
 
     // (7) OVERLAPS: obstáculos empurram; intruso+segurança = vitória;
     // intruso+saída = derrota. Overlap deteta SEM bloquear (vs. collider).
@@ -178,13 +189,13 @@ class CenaPerseguicao extends Phaser.Scene {
       // Degrau e muro: posições e larguras aleatórias, gap saltável (190-260).
       const degrauX = R(620, 980);
       const muroX = degrauX + R(190, 260);
-      this.criarPlataforma(degrauX, R(790, 840), R(210, 290), 28);
-      this.criarMuro(muroX, R(610, 690), R(100, 150));
+      this.criarPlataforma(degrauX, R(790, 840), R(220, 300));
+      this.criarMuro(muroX, R(610, 690));
       proibidoMin = degrauX - 320;
-      proibidoMax = muroX + 160;
-      alvo = R(2, 4);
+      proibidoMax = muroX + 200;
+      alvo = R(1, 2);
     } else {
-      alvo = R(4, 6); // sem muro → mais obstáculos para compensar
+      alvo = R(3, 4); // sem muro → uns quantos a mais para compensar
     }
 
     // Obstáculos: tipo ao calhas (caixa/coluna/mesa), fora do corredor de
@@ -231,10 +242,12 @@ class CenaPerseguicao extends Phaser.Scene {
   }
 
   // ---------- Ajudas para criar objetos ----------
-  // Plataforma estática (degrau) com visual "disco": base escura + bordo cião.
-  criarPlataforma(x, y, larg, alt, corNeon = 0x2fcbe4) {
-    const p = this.add.rectangle(x, y, larg, alt, 0x0d0a18).setStrokeStyle(5, corNeon);
-    this.plataformas.add(p); // ao juntar ao grupo estático ganha corpo estático
+  // Degrau: sprite da plataforma. Largura dada, altura pela proporção da imagem.
+  // 'create' num grupo estático já dá corpo físico; depois de escalar é preciso
+  // refreshBody() para o corpo de colisão bater certo com o novo tamanho.
+  criarPlataforma(x, y, larg) {
+    const p = this.plataformas.create(x, y, 'plataforma');
+    p.setDisplaySize(larg, larg * p.height / p.width).refreshBody();
     return p;
   }
 
@@ -245,23 +258,55 @@ class CenaPerseguicao extends Phaser.Scene {
     return c;
   }
 
-  // Muro alto: vai do 'topo' até ao chão. Vive no grupo das plataformas (só o
-  // segurança colide). Bordo laranja para se ler como barreira.
-  criarMuro(x, topo, larg = 120) {
+  // Muro alto: uma pilha (coluna OU caixa, à sorte) escalada para ir do 'topo'
+  // até ao chão. Vive no grupo das plataformas (só o segurança colide).
+  criarMuro(x, topo) {
     const alt = CenaPerseguicao.SOLO_TOPO_Y - topo;
-    const m = this.add.rectangle(x, topo + alt / 2, larg, alt, 0x0d0a18).setStrokeStyle(5, 0xffa500);
-    this.plataformas.add(m);
+    const tex = Phaser.Utils.Array.GetRandom(CenaPerseguicao.TIPOS_MURO);
+    const m = this.plataformas.create(x, 0, tex);
+    m.setScale(alt / m.height);                              // escala à altura do muro
+    m.y = CenaPerseguicao.SOLO_TOPO_Y - m.displayHeight / 2; // assenta no chão
+    m.refreshBody();
     return m;
   }
 
-  // Obstáculo assente no chão (a base fica sempre a SOLO_TOPO_Y).
-  // 'tipo' vem de TIPOS_OBSTACULO: dá os intervalos de tamanho e a cor.
+  // Obstáculo: sprite escalado para a altura-alvo do tipo (largura pela
+  // proporção) e assente no chão (base a SOLO_TOPO_Y).
+  // Brilho da pista (só visual): um GRADIENTE encostado à borda direita, só na
+  // zona de baixo (um pouco mais alto que o boneco), forte no canto e a esbater
+  // para a esquerda/cima. É aqui que o intruso "se enfia" e escapa.
+  // fillGradientStyle dá uma cor + alpha por canto (precisa de WebGL).
+  criarFeixe() {
+    const VERDE = 0x33ff66;
+    const X0 = 1620, LARG = 300;   // de x=1620 até à borda (1920)
+    const Y0 = 0,    ALT = 1000;    // do topo até um pouco acima da linha rosa do chão
+    const g = this.add.graphics().setDepth(1);
+    // cantos: (sup-esq, sup-dir, inf-esq, inf-dir) -> alphas: esquerda 0,
+    // direita forte, mais intenso em baixo.
+    g.fillGradientStyle(VERDE, VERDE, VERDE, VERDE, 0, 0.10, 0, 0.55);
+    g.fillRect(X0, Y0, LARG, ALT);
+    this.feixe = g;
+    // Pulsa muito devagar (luz "viva", mas uniforme).
+    this.tweens.add({
+      targets: g, alpha: 0.8,
+      duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    });
+    return g;
+  }
+
   criarObstaculo(x, tipo) {
-    const R = Phaser.Math.Between;
-    const larg = R(tipo.larg[0], tipo.larg[1]);
-    const alt = R(tipo.alt[0], tipo.alt[1]);
-    const o = this.add.rectangle(x, CenaPerseguicao.SOLO_TOPO_Y - alt / 2, larg, alt, tipo.cor);
-    this.obstaculos.add(o);
+    const o = this.obstaculos.create(x, 0, tipo.tex);
+    o.setScale(tipo.altura / o.height);                       // mantém a proporção
+    o.y = CenaPerseguicao.SOLO_TOPO_Y - o.displayHeight / 2;  // assenta no chão
+    o.refreshBody();
+
+    // Hitbox menor que a imagem (tira o brilho/ar à volta), centrada no
+    // objeto e assente no chão — a colisão é por OVERLAP (empurrão).
+    const w = o.displayWidth * tipo.hitW;
+    const h = o.displayHeight * tipo.hitH;
+    o.body.setSize(w, h);
+    o.body.position.set(o.x - w / 2, CenaPerseguicao.SOLO_TOPO_Y - h);
+    o.body.updateCenter();
     return o;
   }
 
