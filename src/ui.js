@@ -23,11 +23,7 @@ const UI = {
 
     // A moldura é a zona clicável (área grande = mais fácil de acertar).
     moldura.setInteractive({ useHandCursor: true });
-    moldura.on('pointerdown', () => {
-      // Som do clique (se estiver carregado nesta cena).
-      Som.efeito(cena, 'ui-click', 0.8);
-      aoClicar();
-    });
+    moldura.on('pointerdown', aoClicar);
     moldura.on('pointerover', () => {
       moldura.setStrokeStyle(4, this.CIAO); label.setColor('#ffd166');
     });

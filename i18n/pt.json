@@ -7,8 +7,6 @@
   "opcoes_dificuldade": "DIFICULDADE",
   "opcoes_lingua": "LÍNGUA",
   "lingua_nome": "PORTUGUÊS",
-  "opcoes_musica": "MÚSICA",
-  "opcoes_efeitos": "EFEITOS",
   "opcoes_clica": "clica nas linhas para mudar",
   "opcoes_como_jogar": "COMO JOGAR",
   "opcoes_voltar": "VOLTAR",
@@ -21,11 +19,8 @@
   "dif_dificil": "DIFÍCIL",
 
   "regras_titulo": "REGRAS À PORTA",
-  "regra_idade18": "Idade mínima: 18",
-  "regra_idade21": "Idade mínima: 21",
-  "regra_crocs": "Proibido: crocs",
-  "regra_botas": "Proibido: botas",
   "regra_chapeu": "Proibido: chapéu",
+  "regra_oculos": "Proibido: óculos",
 
   "hud_pontos": "Pontos: ",
   "dica_porta": "←  Barrar          →  Deixar entrar",

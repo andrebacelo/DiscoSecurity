@@ -7,8 +7,6 @@
   "opcoes_dificuldade": "DIFFICULTY",
   "opcoes_lingua": "LANGUAGE",
   "lingua_nome": "ENGLISH",
-  "opcoes_musica": "MUSIC",
-  "opcoes_efeitos": "SFX",
   "opcoes_clica": "click the lines to change",
   "opcoes_como_jogar": "HOW TO PLAY",
   "opcoes_voltar": "BACK",
@@ -21,11 +19,8 @@
   "dif_dificil": "HARD",
 
   "regras_titulo": "DOOR RULES",
-  "regra_idade18": "Minimum age: 18",
-  "regra_idade21": "Minimum age: 21",
-  "regra_crocs": "No crocs",
-  "regra_botas": "No boots",
   "regra_chapeu": "No hats",
+  "regra_oculos": "No sunglasses",
 
   "hud_pontos": "Score: ",
   "dica_porta": "←  Deny          →  Let in",
