@@ -138,13 +138,6 @@ class CenaPorta extends Phaser.Scene {
     ];
   }
 
-  // Tira n regras ao calhas do saco, sem repetir.
-  escolherRegras(n) {
-    // Shuffle baralha o array (como cartas). Uso uma CÓPIA (slice()) para não
-    // estragar o saco original. Fico com as n primeiras.
-    const baralhado = Phaser.Utils.Array.Shuffle(this.poolRegras.slice());
-    return baralhado.slice(0, n);
-  }
 
   // ---------- Fundo (a imagem da discoteca) ----------
   construirFundo() {
@@ -450,7 +443,7 @@ class CenaPorta extends Phaser.Scene {
     });
   }
 
-  // ---------- Timer Contrónuo ----------
+  // ---------- Timer Contínuo ----------
   iniciarTimer() {
     this.barraTempo.scaleX = Phaser.Math.Clamp(this.tempoAtual / CenaPorta.TEMPO_MAXIMO, 0, 1);
   }
@@ -521,11 +514,11 @@ class CenaPorta extends Phaser.Scene {
     if (pts === 5) {
       this.regras = [this.poolRegras[1]]; // Só óculos
       this.atualizarRegrasCentrais();
-      this.mostrarFeedback('NOVA REGRA!', '#ffd166');
+      this.mostrarFeedback(I18N.t('fb_nova_regra'), '#ffd166');
     } else if (pts === 10) {
       this.regras = [this.poolRegras[0], this.poolRegras[1]]; // Ambos
       this.atualizarRegrasCentrais();
-      this.mostrarFeedback('DUAS REGRAS!', '#ffd166');
+      this.mostrarFeedback(I18N.t('fb_duas_regras'), '#ffd166');
     }
   }
 

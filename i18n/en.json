@@ -34,6 +34,8 @@
   "hud_pontos": "Score: ",
   "dica_porta": "←  Deny          →  Let in",
   "fb_certo": "Correct!",
+  "fb_nova_regra": "NEW RULE!",
+  "fb_duas_regras": "TWO RULES!",
   "fb_podia_entrar": "They could enter!",
   "fb_entrou_proibido": "A banned one got in!",
   "fb_tempo": "Time's up!",
