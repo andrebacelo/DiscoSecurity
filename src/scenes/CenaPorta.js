@@ -14,20 +14,22 @@ class CenaPorta extends Phaser.Scene {
   static PORTA_X = 1635;        // para onde vai quando o deixamos entrar.
   static FONTE = '"Press Start 2P"'; // fonte pixel (declarada no index.html).
 
-  // Tempo para decidir cada cliente (ms), por dificuldade. A dificuldade
-  // escolhe-se nas OPÇÕES e fica no registry (partilhada com a perseguição).
-  static TEMPOS = { facil: 7000, normal: 5000, dificil: 3500 };
+  // Banco de tempo máximo inicial (ms). Menor = mais rápido.
+  static TEMPO_MAXIMO = 5000;
+  // Taxa de redução (velocidade de esgotamento) baseada na dificuldade.
+  static DRAIN_RATE = { facil: 1.0, normal: 1.5, dificil: 2.0 };
 
   // preload() corre primeiro: carrega os ficheiros (imagens, som) para a memoria.
   preload() {
     this.load.image('fundo', 'src/assets/images/fundo.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
+    this.load.image('seguranca_menu', 'src/assets/images/seguranca_menu.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
 
     // Sprites do cliente (variantes base / chapéu / óculos / chapéu+óculos).
     this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
     this.load.image('cliente_parado', 'src/assets/images/cliente_parado.png');
-    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 675 });
     this.load.image('cliente_chapeu', 'src/assets/images/cliente_chapeu.png');
     this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
     this.load.image('cliente_parado_oculos', 'src/assets/images/cliente_parado_oculos.png');
@@ -61,11 +63,11 @@ class CenaPorta extends Phaser.Scene {
     this.uiJogo = [];       // elementos de UI escondidos enquanto está o menu
 
     this.poolRegras = this.definirPoolRegras(); // o "saco" com todas as regras
-    this.regras = this.escolherRegras(2);       // tira 2 ao calhas para começar
+    this.regras = [this.poolRegras[0]]; // Começa só com a regra 1 (chapéu)
 
     this.construirFundo();
     this.construirSeguranca();
-    this.construirQuadroRegras();
+    this.construirRegrasCentrais();
     this.construirHUD();
     this.construirTimer();
     this.construirMenu();
@@ -136,13 +138,6 @@ class CenaPorta extends Phaser.Scene {
     ];
   }
 
-  // Tira n regras ao calhas do saco, sem repetir.
-  escolherRegras(n) {
-    // Shuffle baralha o array (como cartas). Uso uma CÓPIA (slice()) para não
-    // estragar o saco original. Fico com as n primeiras.
-    const baralhado = Phaser.Utils.Array.Shuffle(this.poolRegras.slice());
-    return baralhado.slice(0, n);
-  }
 
   // ---------- Fundo (a imagem da discoteca) ----------
   construirFundo() {
@@ -159,24 +154,29 @@ class CenaPorta extends Phaser.Scene {
     const Y = 778;
     const ALTURA = 520;
 
-    this.seguranca = this.add.image(X, Y, 'seguranca');
+    this.seguranca = this.add.image(X, Y, 'seguranca_menu');
     // setScale com altura_alvo / altura_real mantém a proporção (não estica).
     this.seguranca.setScale(ALTURA / this.seguranca.height);
   }
 
-  // ---------- Quadro de regras (canto sup. esq.) ----------
-  construirQuadroRegras() {
-    const painel = this.add.rectangle(40, 40, 620, 300, 0x12121a, 0.85)
-      .setOrigin(0, 0).setStrokeStyle(2, 0x55557a).setDepth(1);
-    const titulo = this.add.text(70, 60, I18N.t('regras_titulo'), {
-      fontFamily: CenaPorta.FONTE, fontSize: '22px', color: '#ffd166',
-    }).setDepth(2);
-    const lista = this.add.text(70, 130,
-      this.regras.map((r) => '•  ' + I18N.t(r.label)).join('\n'),
-      { fontFamily: CenaPorta.FONTE, fontSize: '18px', color: '#dcdcff', lineSpacing: 20 }
-    ).setDepth(2);
+  // ---------- Regras Centrais ----------
+  construirRegrasCentrais() {
+    this.textoRegras = this.add.text(960, 160, '', {
+      fontFamily: CenaPorta.FONTE, fontSize: '32px', color: '#ffd166', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5).setDepth(2);
+    this.uiJogo.push(this.textoRegras);
+  }
 
-    this.uiJogo.push(painel, titulo, lista);
+  atualizarRegrasCentrais() {
+    let chave = '';
+    if (this.regras.length === 2) {
+      chave = 'regra_ambos_grande';
+    } else if (this.regras[0].label === 'regra_chapeu') {
+      chave = 'regra_chapeu_grande';
+    } else {
+      chave = 'regra_oculos_grande';
+    }
+    this.textoRegras.setText(I18N.t(chave)); // String exata (sem toUpperCase)
   }
 
   // ---------- HUD: vidas, pontos, feedback, dica ----------
@@ -187,7 +187,7 @@ class CenaPorta extends Phaser.Scene {
     this.hudPontos = this.add.text(1880, 100, '', {
       fontFamily: CenaPorta.FONTE, fontSize: '22px', color: '#a8e6a3',
     }).setOrigin(1, 0).setDepth(2);
-    this.feedback = this.add.text(960, 150, '', {
+    this.feedback = this.add.text(960, 250, '', {
       fontFamily: CenaPorta.FONTE, fontSize: '28px',
     }).setOrigin(0.5).setDepth(3);
     const dica = this.add.text(960, 1020, I18N.t('dica_porta'), {
@@ -204,12 +204,13 @@ class CenaPorta extends Phaser.Scene {
     this.hudPontos.setText(I18N.t('hud_pontos') + this.registry.get('pontos'));
   }
 
-  // ---------- Barra de tempo (por cima do cliente) ----------
+  // ---------- Barra de tempo (ao centro, acima das regras) ----------
   construirTimer() {
-    const fundo = this.add.rectangle(1080, 300, 400, 30, 0x333344)
+    // Fundo da barra centrado em x=960, y=100 (600 de largura)
+    const fundo = this.add.rectangle(960, 100, 600, 30, 0x333344)
       .setStrokeStyle(2, 0x888899).setDepth(2);
-    // Origem à esquerda: ao reduzir scaleX, a barra encolhe da direita p/ a esq.
-    this.barraTempo = this.add.rectangle(880, 300, 400, 30, 0x4cc9f0)
+    // Barra que diminui: origem à esquerda (x=660) para encolher da direita para a esquerda
+    this.barraTempo = this.add.rectangle(660, 100, 600, 30, 0x4cc9f0)
       .setOrigin(0, 0.5).setDepth(2);
 
     this.uiJogo.push(fundo, this.barraTempo);
@@ -371,10 +372,10 @@ class CenaPorta extends Phaser.Scene {
 
   atualizarLinhasOpcoes() {
     const d = this.registry.get('dificuldade');
-    const seg = (CenaPorta.TEMPOS[d] / 1000).toString()
-      .replace('.', I18N.lingua === 'pt' ? ',' : '.');
+    const segs = (CenaPorta.TEMPO_MAXIMO / 1000) / CenaPorta.DRAIN_RATE[d];
+    const segTexto = segs.toFixed(1).replace('.', I18N.lingua === 'pt' ? ',' : '.');
     this.labelDificuldade.setText(I18N.t('opcoes_dificuldade') + ':  '
-      + I18N.t('dif_' + d) + '  (' + seg + 's)');
+      + I18N.t('dif_' + d) + '  (' + segTexto + 's)');
     this.labelLingua.setText(I18N.t('opcoes_lingua') + ':  ' + I18N.t('lingua_nome'));
     this.labelMusica.setText(I18N.t('opcoes_musica') + ':  ' + Som.percent(Som.musica));
     this.labelEfeitos.setText(I18N.t('opcoes_efeitos') + ':  ' + Som.percent(Som.efeitos));
@@ -396,16 +397,19 @@ class CenaPorta extends Phaser.Scene {
     this.time.delayedCall(400, () => window.close());
   }
 
-  // ---------- JOGAR: reseta o jogo, mostra a UI, menu sobe, entra o cliente ----------
+  // ---------- JOGAR ----------
   iniciarJogo() {
     if (this.estado !== 'menu') return;
     this.estado = 'jogo';
 
     this.registry.set('vidas', 3);
     this.registry.set('pontos', 0);
+    this.tempoAtual = CenaPorta.TEMPO_MAXIMO;
+    this.drainRate = CenaPorta.DRAIN_RATE[this.registry.get('dificuldade')];
+    this.regras = [this.poolRegras[0]]; // Reseta as regras
+    this.atualizarRegrasCentrais();
     this.atualizarHUD();
 
-    // Agora sim, mostra a UI de jogo (estava escondida no menu).
     this.uiJogo.forEach((o) => o.setVisible(true));
 
     this.tweens.add({
@@ -439,33 +443,26 @@ class CenaPorta extends Phaser.Scene {
     });
   }
 
-  // ---------- Timer por cliente ----------
+  // ---------- Timer Contínuo ----------
   iniciarTimer() {
-    this.barraTempo.scaleX = 1; // barra cheia
-    this.timerTween = this.tweens.add({
-      targets: this.barraTempo,
-      scaleX: 0,
-      duration: CenaPorta.TEMPOS[this.registry.get('dificuldade')],
-      ease: 'Linear',
-      onComplete: () => this.tempoEsgotado(),
-    });
+    this.barraTempo.scaleX = Phaser.Math.Clamp(this.tempoAtual / CenaPorta.TEMPO_MAXIMO, 0, 1);
   }
 
   pararTimer() {
-    if (this.timerTween) {
-      this.timerTween.remove(); // cancela o tween para não disparar o onComplete.
-      this.timerTween = null;
-    }
+    // Apenas marcação; a lógica para de descer porque this.aDecidir fica false
   }
 
   tempoEsgotado() {
     if (!this.aDecidir) return; // segurança: já tinha decidido.
     this.aDecidir = false;
-    this.timerTween = null;
 
     this.registry.set('vidas', this.registry.get('vidas') - 1);
     this.mostrarFeedback(I18N.t('fb_tempo'), '#ff6b6b');
     this.voltarParaRua(this.cliente);
+    
+    // Devolve totalmente o tempo para não perder em loop
+    this.tempoAtual = CenaPorta.TEMPO_MAXIMO;
+    this.barraTempo.scaleX = 1;
     this.atualizarHUD();
     this.proximaRonda();
   }
@@ -487,6 +484,10 @@ class CenaPorta extends Phaser.Scene {
     if (correta) {
       this.registry.set('pontos', this.registry.get('pontos') + 1);
       this.mostrarFeedback(I18N.t('fb_certo'), '#a8e6a3');
+      // Ganha tempo com acertos (ex: 1.5s em vez de 2.5s para manter a dificuldade)
+      this.tempoAtual += 1500;
+      if (this.tempoAtual > CenaPorta.TEMPO_MAXIMO) this.tempoAtual = CenaPorta.TEMPO_MAXIMO;
+      this.verificarProgressao();
     } else {
       this.registry.set('vidas', this.registry.get('vidas') - 1);
       if (!deveEntrar && deixouEntrar) {
@@ -497,8 +498,28 @@ class CenaPorta extends Phaser.Scene {
         this.mostrarFeedback(I18N.t('fb_podia_entrar'), '#ff6b6b');
       }
     }
+    
+    this.barraTempo.scaleX = Phaser.Math.Clamp(this.tempoAtual / CenaPorta.TEMPO_MAXIMO, 0, 1);
     this.atualizarHUD();
     this.proximaRonda();
+  }
+
+  verificarProgressao() {
+    const pts = this.registry.get('pontos');
+    
+    // Acelera de forma incremental
+    this.drainRate += 0.05; 
+
+    // Muda as regras em patamares
+    if (pts === 5) {
+      this.regras = [this.poolRegras[1]]; // Só óculos
+      this.atualizarRegrasCentrais();
+      this.mostrarFeedback(I18N.t('fb_nova_regra'), '#ffd166');
+    } else if (pts === 10) {
+      this.regras = [this.poolRegras[0], this.poolRegras[1]]; // Ambos
+      this.atualizarRegrasCentrais();
+      this.mostrarFeedback(I18N.t('fb_duas_regras'), '#ffd166');
+    }
   }
 
   // Espera um pouco (para ler o feedback) e depois: Game Over ou próximo cliente.
@@ -565,5 +586,19 @@ class CenaPorta extends Phaser.Scene {
     const m = this.registry.get('musMenu');
     if (m) m.stop(); // pára a música do menu (o Game Over tem o seu som)
     this.scene.start('GameOverScene', { score: this.registry.get('pontos') });
+  }
+
+  update(time, delta) {
+    if (this.cliente) this.cliente.updateAccessories();
+    
+    // O tempo esgota de forma contínua apenas enquanto o jogador tem de decidir
+    if (this.estado === 'jogo' && this.aDecidir && !this.scene.isPaused('CenaPorta')) {
+      this.tempoAtual -= delta * this.drainRate;
+      if (this.tempoAtual <= 0) {
+        this.tempoAtual = 0;
+        this.tempoEsgotado();
+      }
+      this.barraTempo.scaleX = Phaser.Math.Clamp(this.tempoAtual / CenaPorta.TEMPO_MAXIMO, 0, 1);
+    }
   }
 }
