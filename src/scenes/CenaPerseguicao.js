@@ -50,6 +50,11 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.image('obs-caixa1', 'src/assets/images/obs-caixa1.png');   // caixa única → obstáculo
     this.load.image('obs-mesa', 'src/assets/images/obs-mesa.png');
     this.load.image('plataforma', 'src/assets/images/plataforma.png');
+    // Sprites do intruso (o cliente que entrou — variantes chapéu/óculos).
+    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
+    this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Sons da perseguição.
     this.load.audio('salto', 'src/assets/audio/salto.mp3');
     this.load.audio('bonk', 'src/assets/audio/bonk.mp3');
@@ -111,15 +116,31 @@ class CenaPerseguicao extends Phaser.Scene {
     this.physics.add.collider(this.seguranca, this.chao);        // pisa o chão
     this.physics.add.collider(this.seguranca, this.plataformas); // sobe degrau/muro
 
-    // (5) INTRUSO: corre a direito (velocidade fixa). Só colide com o
-    // chão — é ágil e passa por entre a multidão; o muro é problema apenas do seguranca.
-    this.intruso = this.add.rectangle(360, 880, 70, 210, 0xff4d4d);
+    // (5) INTRUSO: corre a direito (velocidade fixa). A FÍSICA é um retângulo
+    // INVISÍVEL (fiável); por cima fica o sprite animado a segui-lo (abaixo).
+    this.intruso = this.add.rectangle(360, 880, 70, 210, 0xff4d4d).setVisible(false);
     this.physics.add.existing(this.intruso);
     this.intruso.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.intruso, this.chao);
     const dif = this.registry.get('dificuldade');
     this.velIntruso = CenaPerseguicao.VEL_INTRUSO[dif] || 195;
     this.intruso.body.setVelocityX(this.velIntruso);
+
+    // Sprite animado do intruso, na variante que entrou (chapéu/óculos).
+    this.criarAnimacoesIntruso();
+    const at = this.atributos;
+    const variante = (at.chapeu && at.oculos) ? 'chapeu_oculos'
+      : at.chapeu ? 'chapeu' : at.oculos ? 'oculos' : 'base';
+    const VARS = {
+      base:          ['cliente_andar', 'andar'],
+      chapeu:        ['cliente_andar_chapeu', 'andar_chapeu'],
+      oculos:        ['cliente_oculos', 'andar_oculos'],
+      chapeu_oculos: ['cliente_chapeu_oculos_andar', 'andar_chapeu_oculos'],
+    };
+    const [tex, anim] = VARS[variante];
+    this.intrusoSprite = this.add.sprite(this.intruso.x, 0, tex).setOrigin(0.5, 1).setDepth(5);
+    this.intrusoSprite.setScale(220 / this.intrusoSprite.height); // ~220px de altura
+    this.intrusoSprite.play(anim);
 
     // Etiqueta com a infração por cima do intruso (segue-o no update).
     // A CenaPorta envia CHAVES de tradução; o texto final sai do I18N.
@@ -250,6 +271,8 @@ class CenaPerseguicao extends Phaser.Scene {
 
     // A etiqueta da infração segue o intruso.
     this.labelIntruso.setPosition(this.intruso.x, this.intruso.y - 140);
+    // O sprite do intruso segue o corpo (pés alinhados com a base do retângulo).
+    this.intrusoSprite.setPosition(this.intruso.x, this.intruso.body.bottom);
 
     // Tempo (delta = ms desde o último frame). Fica vermelho nos últimos 3s.
     this.tempoRestante -= delta;
@@ -311,6 +334,26 @@ class CenaPerseguicao extends Phaser.Scene {
     return g;
   }
 
+  // Cria as animações de andar do intruso (guard evita recriar / partilha com
+  // a CenaPorta se já existirem).
+  criarAnimacoesIntruso() {
+    const defs = [
+      ['andar', 'cliente_andar'],
+      ['andar_chapeu', 'cliente_andar_chapeu'],
+      ['andar_oculos', 'cliente_oculos'],
+      ['andar_chapeu_oculos', 'cliente_chapeu_oculos_andar'],
+    ];
+    defs.forEach(([key, tex]) => {
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers(tex, { start: 0, end: 3 }),
+          frameRate: 8, repeat: -1,
+        });
+      }
+    });
+  }
+
   criarObstaculo(x, tipo) {
     const o = this.obstaculos.create(x, 0, tipo.tex);
     o.setScale(tipo.altura / o.height);                       // mantém a proporção
@@ -368,6 +411,7 @@ class CenaPerseguicao extends Phaser.Scene {
   mostrarResultado(texto, cor) {
     this.intruso.body.setVelocity(0, 0);
     this.seguranca.body.setVelocity(0, 0);
+    this.intrusoSprite.anims.stop(); // pára a animação de corrida do intruso
     this.add.rectangle(960, 540, 1920, 1080, 0x000000, 0.45).setDepth(15);
     this.add.text(960, 480, texto, {
       fontFamily: CenaPerseguicao.FONTE, fontSize: '64px', color: cor,
