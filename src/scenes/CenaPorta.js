@@ -23,6 +23,17 @@ class CenaPorta extends Phaser.Scene {
     this.load.image('fundo', 'src/assets/images/fundo.png');
     this.load.image('seguranca', 'src/assets/images/seguranca.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
+
+    // Sprites do cliente (variantes base / chapéu / óculos / chapéu+óculos).
+    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
+    this.load.image('cliente_parado', 'src/assets/images/cliente_parado.png');
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.image('cliente_chapeu', 'src/assets/images/cliente_chapeu.png');
+    this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
+    this.load.image('cliente_parado_oculos', 'src/assets/images/cliente_parado_oculos.png');
+    this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
+    this.load.image('cliente_chapeu_oculos_parado', 'src/assets/images/cliente_chapeu_oculos_parado.png');
+
     this.load.audio('ui-click', 'src/assets/audio/ui-click.mp3'); // clique dos botões
     this.load.audio('musica-menu', 'src/assets/audio/musica-menu.mp3'); // fundo do menu/porta
     // Traduções (uma por língua). O loader ignora se já estiverem na cache.
@@ -42,6 +53,7 @@ class CenaPorta extends Phaser.Scene {
 
   create() {
     I18N.carregar(this); // lê os JSON de tradução (carregados no preload)
+    this.criarAnimacoesCliente(); // animações de andar (4 variantes)
 
     this.estado = 'menu';   // 'menu' ou 'jogo'
     this.aDecidir = false;  // true só quando há um cliente à espera de decisão
@@ -91,6 +103,26 @@ class CenaPorta extends Phaser.Scene {
     this.scene.launch('CenaPausa', { de: 'CenaPorta' });
   }
 
+  // Cria as animações de "andar" do cliente (uma por variante de acessórios).
+  // O guard anims.exists evita recriar ao reiniciar a cena (troca de língua).
+  criarAnimacoesCliente() {
+    const defs = [
+      ['andar', 'cliente_andar'],
+      ['andar_chapeu', 'cliente_andar_chapeu'],
+      ['andar_oculos', 'cliente_oculos'],
+      ['andar_chapeu_oculos', 'cliente_chapeu_oculos_andar'],
+    ];
+    defs.forEach(([key, tex]) => {
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers(tex, { start: 0, end: 3 }),
+          frameRate: 8, repeat: -1,
+        });
+      }
+    });
+  }
+
   // ---------- Regras ----------
   // O "saco": todas as regras possíveis. Cada regra tem um label (a mostrar)
   // e um check(atributos) que devolve true se o cliente CUMPRE a regra.
@@ -99,11 +131,8 @@ class CenaPorta extends Phaser.Scene {
   // final sai de I18N.t(label) no momento de desenhar.
   definirPoolRegras() {
     return [
-      { label: 'regra_idade18', check: (a) => a.idade >= 18 },
-      { label: 'regra_idade21', check: (a) => a.idade >= 21 },
-      { label: 'regra_crocs',   check: (a) => a.calcado !== 'crocs' },
-      { label: 'regra_botas',   check: (a) => a.calcado !== 'botas' },
-      { label: 'regra_chapeu',  check: (a) => !a.chapeu },
+      { label: 'regra_chapeu', check: (a) => !a.chapeu },
+      { label: 'regra_oculos', check: (a) => !a.oculos },
     ];
   }
 
@@ -403,6 +432,7 @@ class CenaPorta extends Phaser.Scene {
       ease: 'Linear',
       // Só ao chegar é que se pode decidir — e arranca o timer.
       onComplete: () => {
+        this.cliente.parar(); // pára a animação e mostra a sprite de frente
         this.aDecidir = true;
         this.iniciarTimer();
       },
@@ -484,6 +514,7 @@ class CenaPorta extends Phaser.Scene {
   }
 
   entrarPelaPorta(cliente) {
+    cliente.andar(); // volta a andar ao entrar pela porta
     this.tweens.add({
       targets: cliente, x: CenaPorta.PORTA_X, scale: 0.6, alpha: 0,
       duration: 800, ease: 'Cubic.easeIn',
@@ -491,6 +522,8 @@ class CenaPorta extends Phaser.Scene {
   }
 
   voltarParaRua(cliente) {
+    cliente.andar();
+    cliente.setFlip(true); // vira-se para a esquerda ao ser barrado
     this.tweens.add({
       targets: cliente, x: -200, alpha: 0,
       duration: 800, ease: 'Cubic.easeIn',
