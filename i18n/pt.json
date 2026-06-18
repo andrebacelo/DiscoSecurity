@@ -1,0 +1,49 @@
+{
+  "menu_jogar": "JOGAR",
+  "menu_opcoes": "OPÇÕES",
+  "menu_quit": "SAIR",
+
+  "opcoes_titulo": "OPÇÕES",
+  "opcoes_dificuldade": "DIFICULDADE",
+  "opcoes_lingua": "LÍNGUA",
+  "lingua_nome": "PORTUGUÊS",
+  "opcoes_clica": "clica nas linhas para mudar",
+  "opcoes_como_jogar": "COMO JOGAR",
+  "opcoes_voltar": "VOLTAR",
+
+  "comojogar_titulo": "COMO JOGAR",
+  "comojogar_texto": "FASE PORTA\nLê as regras no canto e decide a tempo:\n←  BARRAR        →  DEIXAR ENTRAR\nAcertar dá um ponto. Errar tira uma vida.\n\nFASE PERSEGUIÇÃO\nDeixaste entrar um proibido? Apanha-o!\nMover: ← →  ou  A D       Saltar: ESPAÇO\nApanha-o antes da saída e recuperas a vida.\n\nESC pausa o jogo.    Sem vidas = Game Over.",
+
+  "dif_facil": "FÁCIL",
+  "dif_normal": "NORMAL",
+  "dif_dificil": "DIFÍCIL",
+
+  "regras_titulo": "REGRAS À PORTA",
+  "regra_chapeu": "Proibido: chapéu",
+  "regra_oculos": "Proibido: óculos",
+
+  "hud_pontos": "Pontos: ",
+  "dica_porta": "←  Barrar          →  Deixar entrar",
+  "fb_certo": "Certo!",
+  "fb_podia_entrar": "Esse podia entrar!",
+  "fb_entrou_proibido": "Entrou um proibido!",
+  "fb_tempo": "Tempo esgotado!",
+
+  "quit_obrigado": "Obrigado por jogares!",
+  "quit_fechar": "Já podes fechar o separador.",
+
+  "pausa_titulo": "PAUSA",
+  "pausa_continuar": "CONTINUAR",
+  "pausa_menu": "VOLTAR AO MENU",
+  "pausa_dica": "ESC para continuar",
+
+  "chase_aviso": "APANHA O INTRUSO!",
+  "chase_dica": "Apanha o intruso!  ←→ / A D mover   ESPAÇO saltar",
+  "chase_intruso": "INTRUSO!",
+  "chase_apanhaste": "APANHASTE!",
+  "chase_escapou": "ESCAPOU!",
+
+  "go_titulo": "GAME OVER",
+  "go_pontos": "Pontos finais: ",
+  "go_reiniciar": "Pressiona ESPAÇO para recomeçar"
+}
