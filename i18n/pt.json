@@ -27,6 +27,9 @@
   "regra_botas": "Proibido: botas",
   "regra_chapeu": "Proibido: chapéu",
   "regra_oculos": "Proibido: óculos",
+  "regra_chapeu_grande": "Proibido Chapeu",
+  "regra_oculos_grande": "Proibido Oculos",
+  "regra_ambos_grande": "Proibido Chapeu e oculos",
 
   "hud_pontos": "Pontos: ",
   "dica_porta": "←  Barrar          →  Deixar entrar",

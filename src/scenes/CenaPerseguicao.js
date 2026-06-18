@@ -26,7 +26,7 @@ class CenaPerseguicao extends Phaser.Scene {
 
   // Velocidade do intruso por dificuldade (a dificuldade vive no registry,
   // escolhida nas OPÇÕES do menu).
-  static VEL_INTRUSO = { facil: 150, normal: 195, dificil: 250 };
+  static VEL_INTRUSO = { facil: 195, normal: 250, dificil: 310 };
 
   // Obstáculos do chão (saltáveis): cada um é um sprite com altura-alvo no
   // jogo (a largura sai da proporção). Apogeu do salto ≈ 300px.
@@ -56,6 +56,11 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.audio('apanhar', 'src/assets/audio/apanhar.mp3');
     this.load.audio('escapou', 'src/assets/audio/escapou.mp3');
     this.load.audio('musica-perseguicao', 'src/assets/audio/musica-perseguicao.mp3');
+    // Sprites do cliente (para mostrar o intruso a fugir).
+    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
+    this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Traduções (necessário para o modo de teste ?cena=perseguicao;
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
@@ -111,9 +116,24 @@ class CenaPerseguicao extends Phaser.Scene {
     this.physics.add.collider(this.seguranca, this.chao);        // pisa o chão
     this.physics.add.collider(this.seguranca, this.plataformas); // sobe degrau/muro
 
-    // (5) INTRUSO: corre a direito (velocidade fixa). Só colide com o
-    // chão — é ágil e passa por entre a multidão; o muro é problema apenas do seguranca.
-    this.intruso = this.add.rectangle(360, 880, 70, 210, 0xff4d4d);
+    // (5) INTRUSO: sprite do cliente a fugir (usa os mesmos sprites da CenaPorta).
+    // Determina a variante com base nos atributos recebidos.
+    const intrusoVariante = this.obterVarianteIntruso(this.atributos);
+    const intrusoCfg = this.obterConfigIntruso(intrusoVariante);
+
+    // Cria animação de andar se não existir
+    if (!this.anims.exists(intrusoCfg.anim)) {
+      this.anims.create({
+        key: intrusoCfg.anim,
+        frames: this.anims.generateFrameNumbers(intrusoCfg.texture, { start: 0, end: 3 }),
+        frameRate: 10, repeat: -1,
+      });
+    }
+
+    this.intruso = this.add.sprite(360, 880, intrusoCfg.texture);
+    this.intruso.setScale(intrusoCfg.scale);
+    this.intruso.setOrigin(0.5, 1);
+    this.intruso.play(intrusoCfg.anim);
     this.physics.add.existing(this.intruso);
     this.intruso.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.intruso, this.chao);
@@ -381,5 +401,23 @@ class CenaPerseguicao extends Phaser.Scene {
     const mm = this.registry.get('musMenu'); if (mm) mm.resume(); // retoma a do menu
     this.scene.stop();                 // fecha esta cena
     this.scene.resume('CenaPorta');    // retoma a fase porta onde estava
+  }
+
+  // ---------- Helpers para o sprite do intruso ----------
+  obterVarianteIntruso(atributos) {
+    if (atributos.chapeu && atributos.oculos) return 'chapeu_oculos';
+    if (atributos.chapeu) return 'chapeu';
+    if (atributos.oculos) return 'oculos';
+    return 'base';
+  }
+
+  obterConfigIntruso(variante) {
+    const configs = {
+      base:           { texture: 'cliente_andar',              anim: 'andar',              scale: 0.45 },
+      chapeu:         { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.35 },
+      oculos:         { texture: 'cliente_oculos',             anim: 'andar_oculos',       scale: 0.55 },
+      chapeu_oculos:  { texture: 'cliente_chapeu_oculos_andar', anim: 'andar_chapeu_oculos', scale: 0.70 },
+    };
+    return configs[variante] || configs.base;
   }
 }

@@ -27,6 +27,9 @@
   "regra_botas": "No boots",
   "regra_chapeu": "No hats",
   "regra_oculos": "No glasses",
+  "regra_chapeu_grande": "No Hats Allowed",
+  "regra_oculos_grande": "No Glasses Allowed",
+  "regra_ambos_grande": "No Hats and Glasses",
 
   "hud_pontos": "Score: ",
   "dica_porta": "←  Deny          →  Let in",

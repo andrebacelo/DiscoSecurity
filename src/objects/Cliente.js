@@ -11,23 +11,23 @@
 const VARIANTES = {
   // { chapeu: false, oculos: false }
   base: {
-    andar:  { texture: 'cliente_andar',              anim: 'andar',              scale: 0.6 },
-    parado: { texture: 'cliente_parado',             anim: null,                 scale: 0.3 },
+    andar:  { texture: 'cliente_andar',              anim: 'andar',              scale: 0.59, yOff: 0 },
+    parado: { texture: 'cliente_parado',             anim: null,                 scale: 0.30, yOff: 0 },
   },
   // { chapeu: true, oculos: false }
   chapeu: {
-    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.4 },
-    parado: { texture: 'cliente_chapeu',             anim: null,                 scale: 0.6 },
+    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.45, yOff: 50 },
+    parado: { texture: 'cliente_chapeu',             anim: null,                 scale: 0.63, yOff: 0 },
   },
   // { chapeu: false, oculos: true }
   oculos: {
-    andar:  { texture: 'cliente_oculos',             anim: 'andar_oculos',       scale: 0.8 },
-    parado: { texture: 'cliente_parado_oculos',      anim: null,                 scale: 0.3 },
+    andar:  { texture: 'cliente_oculos',             anim: 'andar_oculos',       scale: 0.77, yOff: 0 },
+    parado: { texture: 'cliente_parado_oculos',      anim: null,                 scale: 0.30, yOff: 0 },
   },
   // { chapeu: true, oculos: true }
   chapeu_oculos: {
-    andar:  { texture: 'cliente_chapeu_oculos_andar',  anim: 'andar_chapeu_oculos', scale: 1.0 },
-    parado: { texture: 'cliente_chapeu_oculos_parado', anim: null,                  scale: 1.0 },
+    andar:  { texture: 'cliente_chapeu_oculos_andar',  anim: 'andar_chapeu_oculos', scale: 0.94, yOff: 0 },
+    parado: { texture: 'cliente_chapeu_oculos_parado', anim: null,                  scale: 0.97, yOff: 0 },
   },
 };
 
@@ -61,6 +61,7 @@ class Cliente extends Phaser.GameObjects.Container {
     this.sprite.setTexture(cfg.texture);
     this.sprite.setScale(cfg.scale);
     this.sprite.setOrigin(0.5, 1);
+    this.sprite.y = 220 + (cfg.yOff || 0);
     if (cfg.anim) {
       this.sprite.play(cfg.anim);
     }
@@ -72,6 +73,7 @@ class Cliente extends Phaser.GameObjects.Container {
     this.sprite.setTexture(cfg.texture);
     this.sprite.setScale(cfg.scale);
     this.sprite.setOrigin(0.5, 1);
+    this.sprite.y = 220 + (cfg.yOff || 0);
     if (cfg.anim) {
       this.sprite.play(cfg.anim);
     }
