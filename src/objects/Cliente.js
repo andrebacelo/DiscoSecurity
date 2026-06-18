@@ -11,23 +11,23 @@
 const VARIANTES = {
   // { chapeu: false, oculos: false }
   base: {
-    andar:  { texture: 'cliente_andar',              anim: 'andar',              scale: 0.6 },
-    parado: { texture: 'cliente_parado',             anim: null,                 scale: 0.3 },
+    andar:  { texture: 'cliente_andar',              anim: 'andar',              scale: 0.59 },
+    parado: { texture: 'cliente_parado',             anim: null,                 scale: 0.30 },
   },
   // { chapeu: true, oculos: false }
   chapeu: {
-    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.4 },
-    parado: { texture: 'cliente_chapeu',             anim: null,                 scale: 0.6 },
+    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.37 },
+    parado: { texture: 'cliente_chapeu',             anim: null,                 scale: 0.63 },
   },
   // { chapeu: false, oculos: true }
   oculos: {
-    andar:  { texture: 'cliente_oculos',             anim: 'andar_oculos',       scale: 0.8 },
-    parado: { texture: 'cliente_parado_oculos',      anim: null,                 scale: 0.3 },
+    andar:  { texture: 'cliente_oculos',             anim: 'andar_oculos',       scale: 0.77 },
+    parado: { texture: 'cliente_parado_oculos',      anim: null,                 scale: 0.30 },
   },
   // { chapeu: true, oculos: true }
   chapeu_oculos: {
-    andar:  { texture: 'cliente_chapeu_oculos_andar',  anim: 'andar_chapeu_oculos', scale: 1.0 },
-    parado: { texture: 'cliente_chapeu_oculos_parado', anim: null,                  scale: 1.0 },
+    andar:  { texture: 'cliente_chapeu_oculos_andar',  anim: 'andar_chapeu_oculos', scale: 0.94 },
+    parado: { texture: 'cliente_chapeu_oculos_parado', anim: null,                  scale: 0.97 },
   },
 };
 

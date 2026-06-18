@@ -21,6 +21,9 @@
   "regras_titulo": "DOOR RULES",
   "regra_chapeu": "No hats",
   "regra_oculos": "No sunglasses",
+  "regra_chapeu_grande": "Prohibited Hat",
+  "regra_oculos_grande": "Prohibited Glasses",
+  "regra_ambos_grande": "Prohibited Hat and Glasses",
 
   "hud_pontos": "Score: ",
   "dica_porta": "←  Deny          →  Let in",
