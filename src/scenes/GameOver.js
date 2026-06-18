@@ -5,6 +5,7 @@ class GameOverScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio('gameover', 'src/assets/audio/gameover.mp3');
     // Traduções (já em cache em jogo normal; o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
     this.load.json('i18n-en', 'i18n/en.json');

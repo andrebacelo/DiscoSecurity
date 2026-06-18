@@ -4,9 +4,8 @@
 const config = {
   type: Phaser.AUTO,
   parent: 'game',
-  pixelArt: true,
   backgroundColor: '#1d1d2b',
-  // Scale Manager: a resolução interna é 1920x1080, e o FIT estica
+  // Scale Manager: a resolução interna é 1280x720 (nítida), e o FIT estica
   // para caber na janela mantendo a proporção; CENTER_BOTH centra o canvas.
   scale: {
     mode: Phaser.Scale.FIT,
@@ -34,6 +33,7 @@ const config = {
 // desenha o texto numa textura no momento em que a cena arranca; se a fonte
 // ainda não estiver pronta, usa a do sistema e não volta a corrigir.
 async function arrancarJogo() {
+  Som.carregar(); // lê os volumes guardados (música/efeitos) antes de arrancar
   try {
     await document.fonts.load('16px "Press Start 2P"');
     await document.fonts.ready;

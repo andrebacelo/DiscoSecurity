@@ -19,21 +19,13 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="error-log" style="position:absolute; top:10px; left:10px; color:red; z-index:9999; font-family:monospace; background:rgba(0,0,0,0.8); padding:10px; display:none;"></div>
-  <script>
-    window.onerror = function(msg, url, lineNo, columnNo, error) {
-      document.getElementById('error-log').style.display = 'block';
-      document.getElementById('error-log').innerHTML += msg + '<br>';
-      return false;
-    };
-  </script>
+
   <!-- Phaser 3 fixado na 3.90.0 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
-  <!-- Módulos partilhados (i18n, UI) antes de tudo o resto. -->
-  <script src="src/i18n.js"></script>
-  <script src="src/ui.js"></script>
   <!-- Objetos primeiro (as cenas usam-nos), depois as cenas, main.js por último. -->
+  <script src="src/i18n.js"></script>
   <script src="src/som.js"></script>
+  <script src="src/ui.js"></script>
   <script src="src/objects/Cliente.js"></script>
   <script src="src/scenes/CenaPorta.js"></script>
   <script src="src/scenes/CenaPerseguicao.js"></script>
