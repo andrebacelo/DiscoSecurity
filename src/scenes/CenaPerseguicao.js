@@ -18,22 +18,22 @@ class CenaPerseguicao extends Phaser.Scene {
   }
 
   // Constantes afináveis num só sítio (mais fácil de equilibrar depois).
-  static GRAVIDADE     = 1200;  // puxa para baixo nesta cena
+  static GRAVIDADE = 1200;  // puxa para baixo nesta cena
   static VEL_SEGURANCA = 360;   // velocidade horizontal do jogador
-  static VEL_SALTO     = 850;   // impulso do salto (para cima)
-  static SOLO_TOPO_Y   = 1000;  // altura do chão (topo da superfície)
+  static VEL_SALTO = 850;   // impulso do salto (para cima)
+  static SOLO_TOPO_Y = 1000;  // altura do chão (topo da superfície)
   static FONTE = '"Press Start 2P"';
 
   // Velocidade do intruso por dificuldade (a dificuldade vive no registry,
   // escolhida nas OPÇÕES do menu).
-  static VEL_INTRUSO = { facil: 150, normal: 195, dificil: 250 };
+  static VEL_INTRUSO = { facil: 195, normal: 250, dificil: 310 };
 
   // Obstáculos do chão (saltáveis): cada um é um sprite com altura-alvo no
   // jogo (a largura sai da proporção). Apogeu do salto ≈ 300px.
   // hitW/hitH = fração da imagem que conta como colisão (o resto é brilho/ar).
   static TIPOS_OBSTACULO = [
     { tex: 'obs-caixa1', altura: 100, hitW: 0.70, hitH: 0.78 }, // uma caixa
-    { tex: 'obs-mesa',   altura: 120, hitW: 0.86, hitH: 0.55 }, // mesa (baixa, larga)
+    { tex: 'obs-mesa', altura: 120, hitW: 0.86, hitH: 0.55 }, // mesa (baixa, larga)
   ];
 
   // Muro (barreira alta a trepar): a coluna de som, escalada à altura.
@@ -52,7 +52,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.image('plataforma', 'src/assets/images/plataforma.png');
     // Sprites do intruso (o cliente que entrou — variantes chapéu/óculos).
     this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
-    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 675 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
     this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
     this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Sons da perseguição.
@@ -61,6 +61,11 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.audio('apanhar', 'src/assets/audio/apanhar.mp3');
     this.load.audio('escapou', 'src/assets/audio/escapou.mp3');
     this.load.audio('musica-perseguicao', 'src/assets/audio/musica-perseguicao.mp3');
+    // Sprites do cliente (para mostrar o intruso a fugir).
+    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
+    this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Traduções (necessário para o modo de teste ?cena=perseguicao;
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
@@ -116,8 +121,8 @@ class CenaPerseguicao extends Phaser.Scene {
     this.physics.add.collider(this.seguranca, this.chao);        // pisa o chão
     this.physics.add.collider(this.seguranca, this.plataformas); // sobe degrau/muro
 
-    // (5) INTRUSO: corre a direito (velocidade fixa). A FÍSICA é um retângulo
-    // INVISÍVEL (fiável); por cima fica o sprite animado a segui-lo (abaixo).
+    // (5) INTRUSO: corre a direito (velocidade fixa). Só colide com o
+    // chão — é ágil e passa por entre a multidão; o muro é problema apenas do seguranca.
     this.intruso = this.add.rectangle(360, 880, 70, 210, 0xff4d4d).setVisible(false);
     this.physics.add.existing(this.intruso);
     this.intruso.body.setCollideWorldBounds(true);
@@ -132,9 +137,9 @@ class CenaPerseguicao extends Phaser.Scene {
     const variante = (at.chapeu && at.oculos) ? 'chapeu_oculos'
       : at.chapeu ? 'chapeu' : at.oculos ? 'oculos' : 'base';
     const VARS = {
-      base:          ['cliente_andar', 'andar'],
-      chapeu:        ['cliente_andar_chapeu', 'andar_chapeu'],
-      oculos:        ['cliente_oculos', 'andar_oculos'],
+      base: ['cliente_andar', 'andar'],
+      chapeu: ['cliente_andar_chapeu', 'andar_chapeu'],
+      oculos: ['cliente_oculos', 'andar_oculos'],
       chapeu_oculos: ['cliente_chapeu_oculos_andar', 'andar_chapeu_oculos'],
     };
     const [tex, anim] = VARS[variante];
@@ -142,13 +147,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.intrusoSprite.setScale(220 / this.intrusoSprite.height); // ~220px de altura
     this.intrusoSprite.play(anim);
 
-    // Etiqueta com a infração por cima do intruso (segue-o no update).
-    // A CenaPorta envia CHAVES de tradução; o texto final sai do I18N.
-    const chaveInfracao = this.infracoes[0] || 'chase_intruso';
-    this.labelIntruso = this.add.text(360, 740, I18N.t(chaveInfracao), {
-      fontFamily: CenaPerseguicao.FONTE, fontSize: '16px', color: '#ffffff',
-      backgroundColor: '#c0392bdd', padding: { x: 8, y: 6 },
-    }).setOrigin(0.5).setDepth(10);
+    // Etiqueta removida a pedido do utilizador.
 
     // (6) ZONA DE FUGA: o intruso "perde-se na pista". Encostada à direita
     // (zona de colisão invisível) para a fuga só contar quase no fim do ecrã.
@@ -254,13 +253,13 @@ class CenaPerseguicao extends Phaser.Scene {
     if (this.resolvido) return;
 
     const corpo = this.seguranca.body;
-    const esquerda = this.cursores.left.isDown  || this.teclas.A.isDown;
-    const direita  = this.cursores.right.isDown || this.teclas.D.isDown;
+    const esquerda = this.cursores.left.isDown || this.teclas.A.isDown;
+    const direita = this.cursores.right.isDown || this.teclas.D.isDown;
 
     // Movimento horizontal (+ vira o sprite para o lado do movimento).
-    if (esquerda)      { corpo.setVelocityX(-CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(true); }
-    else if (direita)  { corpo.setVelocityX(CenaPerseguicao.VEL_SEGURANCA);  this.seguranca.setFlipX(false); }
-    else               corpo.setVelocityX(0);
+    if (esquerda) { corpo.setVelocityX(-CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(true); }
+    else if (direita) { corpo.setVelocityX(CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(false); }
+    else corpo.setVelocityX(0);
 
     // Salto: só quando os pés estão no chão (blocked.down).
     const querSaltar = this.cursores.up.isDown || this.teclas.W.isDown || this.teclas.SPACE.isDown;
@@ -269,8 +268,7 @@ class CenaPerseguicao extends Phaser.Scene {
       Som.efeito(this, 'salto', 0.5);
     }
 
-    // A etiqueta da infração segue o intruso.
-    this.labelIntruso.setPosition(this.intruso.x, this.intruso.y - 140);
+
     // O sprite do intruso segue o corpo (pés alinhados com a base do retângulo).
     this.intrusoSprite.setPosition(this.intruso.x, this.intruso.body.bottom);
 
@@ -319,7 +317,7 @@ class CenaPerseguicao extends Phaser.Scene {
   criarFeixe() {
     const VERDE = 0x33ff66;
     const X0 = 1620, LARG = 300;   // de x=1620 até à borda (1920)
-    const Y0 = 0,    ALT = 1000;    // do topo até um pouco acima da linha rosa do chão
+    const Y0 = 0, ALT = 1000;    // do topo até um pouco acima da linha rosa do chão
     const g = this.add.graphics().setDepth(1);
     // cantos: (sup-esq, sup-dir, inf-esq, inf-dir) -> alphas: esquerda 0,
     // direita forte, mais intenso em baixo.
@@ -425,5 +423,23 @@ class CenaPerseguicao extends Phaser.Scene {
     const mm = this.registry.get('musMenu'); if (mm) mm.resume(); // retoma a do menu
     this.scene.stop();                 // fecha esta cena
     this.scene.resume('CenaPorta');    // retoma a fase porta onde estava
+  }
+
+  // ---------- Helpers para o sprite do intruso ----------
+  obterVarianteIntruso(atributos) {
+    if (atributos.chapeu && atributos.oculos) return 'chapeu_oculos';
+    if (atributos.chapeu) return 'chapeu';
+    if (atributos.oculos) return 'oculos';
+    return 'base';
+  }
+
+  obterConfigIntruso(variante) {
+    const configs = {
+      base: { texture: 'cliente_andar', anim: 'andar', scale: 0.45 },
+      chapeu: { texture: 'cliente_andar_chapeu', anim: 'andar_chapeu', scale: 0.35 },
+      oculos: { texture: 'cliente_oculos', anim: 'andar_oculos', scale: 0.55 },
+      chapeu_oculos: { texture: 'cliente_chapeu_oculos_andar', anim: 'andar_chapeu_oculos', scale: 0.70 },
+    };
+    return configs[variante] || configs.base;
   }
 }
