@@ -29,7 +29,7 @@ class CenaPorta extends Phaser.Scene {
     // Sprites do cliente (variantes base / chapéu / óculos / chapéu+óculos).
     this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
     this.load.image('cliente_parado', 'src/assets/images/cliente_parado.png');
-    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 675 });
     this.load.image('cliente_chapeu', 'src/assets/images/cliente_chapeu.png');
     this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
     this.load.image('cliente_parado_oculos', 'src/assets/images/cliente_parado_oculos.png');

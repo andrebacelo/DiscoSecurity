@@ -16,7 +16,7 @@ const VARIANTES = {
   },
   // { chapeu: true, oculos: false }
   chapeu: {
-    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.45, yOff: 50 },
+    andar:  { texture: 'cliente_andar_chapeu',       anim: 'andar_chapeu',       scale: 0.45, yOff: 0 },
     parado: { texture: 'cliente_chapeu',             anim: null,                 scale: 0.63, yOff: 0 },
   },
   // { chapeu: false, oculos: true }
