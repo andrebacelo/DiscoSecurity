@@ -375,6 +375,7 @@ class CenaPerseguicao extends Phaser.Scene {
   // Empurrão ao tocar num obstáculo (com cooldown para não disparar 60x/s).
   // O abanão da câmara dá feedback físico sem precisar de animação.
   tocarObstaculo(seguranca) {
+    if (this.resolvido) return; // fase já acabou: sem empurrão, abano nem som
     if (!this.podeLevarEmpurrao) return;
     this.podeLevarEmpurrao = false;
     seguranca.body.setVelocityX(-420); // atira para trás
@@ -413,6 +414,8 @@ class CenaPerseguicao extends Phaser.Scene {
     this.intruso.body.setVelocity(0, 0);
     this.seguranca.body.setVelocity(0, 0);
     this.intrusoSprite.anims.stop(); // pára a animação de corrida do intruso
+    this.seguranca.anims.stop();     // pára a animação de andar do segurança
+    this.seguranca.setFrame(0);      // fica num frame parado, não a meio do passo
     this.add.rectangle(960, 540, 1920, 1080, 0x000000, 0.45).setDepth(15);
     this.add.text(960, 480, texto, {
       fontFamily: CenaPerseguicao.FONTE, fontSize: '64px', color: cor,
