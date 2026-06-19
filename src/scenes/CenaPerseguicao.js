@@ -45,6 +45,9 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.image('fundo-disco', 'src/assets/images/fundo-disco.png');
     // Segurança ANIMADO (6 frames de caminhada).
     this.load.spritesheet('seguranca_andar', 'src/assets/images/seguranca_andar.png', { frameWidth: 138, frameHeight: 246 });
+    // Pose estática (parado): mesmo tamanho de frame que a andar, para a troca
+    // de textura não alterar escala/corpo físico.
+    this.load.image('seguranca_parado', 'src/assets/images/seguranca_parado.png');
     // Sprites do nível. As pilhas altas (coluna, caixa) servem de MURO;
     // a caixa única e a mesa são os obstáculos do chão (saltáveis).
     this.load.image('obs-coluna', 'src/assets/images/obs-coluna.png');   // coluna → muro
@@ -120,6 +123,7 @@ class CenaPerseguicao extends Phaser.Scene {
     }
     this.seguranca = this.physics.add.sprite(140, 860, 'seguranca_andar');
     this.seguranca.setScale(230 / this.seguranca.height); // ~230px de altura
+    this.seguranca.setTexture('seguranca_parado'); // nasce na pose parada (só anda ao mexer-se)
     this.seguranca.setCollideWorldBounds(true);           // não sai do ecrã
     this.physics.add.collider(this.seguranca, this.chao);        // pisa o chão
     this.physics.add.collider(this.seguranca, this.plataformas); // sobe degrau/muro
@@ -262,7 +266,7 @@ class CenaPerseguicao extends Phaser.Scene {
     // Movimento horizontal (+ vira o sprite para o lado do movimento).
     if (esquerda) { corpo.setVelocityX(-CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(true); this.seguranca.play('seg_andar', true); }
     else if (direita) { corpo.setVelocityX(CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(false); this.seguranca.play('seg_andar', true); }
-    else { corpo.setVelocityX(0); this.seguranca.stop(); this.seguranca.setFrame(0); } // parado = 1ª frame
+    else { corpo.setVelocityX(0); this.seguranca.stop(); this.seguranca.setTexture('seguranca_parado'); } // parado = pose própria, pernas quietas
 
     // Salto: só quando os pés estão no chão (blocked.down).
     const querSaltar = this.cursores.up.isDown || this.teclas.W.isDown || this.teclas.SPACE.isDown;
@@ -415,7 +419,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.seguranca.body.setVelocity(0, 0);
     this.intrusoSprite.anims.stop(); // pára a animação de corrida do intruso
     this.seguranca.anims.stop();     // pára a animação de andar do segurança
-    this.seguranca.setFrame(0);      // fica num frame parado, não a meio do passo
+    this.seguranca.setTexture('seguranca_parado'); // fica na pose parada, não a meio do passo
     this.add.rectangle(960, 540, 1920, 1080, 0x000000, 0.45).setDepth(15);
     this.add.text(960, 480, texto, {
       fontFamily: CenaPerseguicao.FONTE, fontSize: '64px', color: cor,
