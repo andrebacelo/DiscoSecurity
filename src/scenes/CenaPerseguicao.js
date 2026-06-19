@@ -69,6 +69,7 @@ class CenaPerseguicao extends Phaser.Scene {
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
     this.load.json('i18n-en', 'i18n/en.json');
+    this.load.json('i18n-es', 'i18n/es.json');
   }
 
   // init() corre antes de create() e recebe os dados do launch().

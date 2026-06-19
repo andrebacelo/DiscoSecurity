@@ -9,20 +9,25 @@
 //
 // É um objeto global simples (sem módulos) porque o projeto usa script tags.
 const I18N = {
+  // Ordem de rotação das línguas (o botão IDIOMA passa à seguinte e dá a volta).
+  LINGUAS: ['pt', 'en', 'es'],
+
   // Língua ativa: recupera a última escolha do localStorage (sobrevive a
   // fechar o separador). O try/catch protege contra modo privado/bloqueado.
   lingua: (() => {
     try {
       const guardada = localStorage.getItem('discosecurity-lingua');
-      return guardada === 'en' ? 'en' : 'pt';
+      // Só aceita uma língua conhecida; senão, cai no português.
+      return ['pt', 'en', 'es'].includes(guardada) ? guardada : 'pt';
     } catch (e) { return 'pt'; }
   })(),
-  textos: { pt: null, en: null },
+  textos: { pt: null, en: null, es: null },
 
   // Lê os JSON (já carregados pelo loader da cena) para a memória.
   carregar(cena) {
     this.textos.pt = cena.cache.json.get('i18n-pt');
     this.textos.en = cena.cache.json.get('i18n-en');
+    this.textos.es = cena.cache.json.get('i18n-es');
   },
 
   // Devolve o texto na língua ativa. Se a chave não existir, devolve a
@@ -33,7 +38,9 @@ const I18N = {
   },
 
   trocar() {
-    this.lingua = this.lingua === 'pt' ? 'en' : 'pt';
+    // Avança para a próxima língua da lista e dá a volta no fim (% length).
+    const i = this.LINGUAS.indexOf(this.lingua);
+    this.lingua = this.LINGUAS[(i + 1) % this.LINGUAS.length];
     try { localStorage.setItem('discosecurity-lingua', this.lingua); } catch (e) { /* sem storage */ }
   },
 };
