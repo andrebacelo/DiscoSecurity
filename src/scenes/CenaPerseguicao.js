@@ -115,7 +115,7 @@ class CenaPerseguicao extends Phaser.Scene {
       this.anims.create({
         key: 'seg_andar',
         frames: this.anims.generateFrameNumbers('seguranca_andar', { start: 0, end: 5 }),
-        frameRate: 12, repeat: -1,
+        frameRate: 8, repeat: -1,
       });
     }
     this.seguranca = this.physics.add.sprite(140, 860, 'seguranca_andar');

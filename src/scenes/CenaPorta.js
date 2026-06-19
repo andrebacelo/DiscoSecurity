@@ -22,7 +22,6 @@ class CenaPorta extends Phaser.Scene {
   // preload() corre primeiro: carrega os ficheiros (imagens, som) para a memoria.
   preload() {
     this.load.image('fundo', 'src/assets/images/fundo.png');
-    this.load.image('seguranca', 'src/assets/images/seguranca.png');
     this.load.image('seguranca_menu', 'src/assets/images/seguranca_menu.png');
     this.load.image('titulo', 'src/assets/images/titulo.png');
 
@@ -157,6 +156,9 @@ class CenaPorta extends Phaser.Scene {
     this.seguranca = this.add.image(X, Y, 'seguranca_menu');
     // setScale com altura_alvo / altura_real mantém a proporção (não estica).
     this.seguranca.setScale(ALTURA / this.seguranca.height);
+    // Depth 4 = à FRENTE do cliente (depth 0), para o cliente entrar/desvanecer
+    // por TRÁS do segurança. Fica abaixo do menu/painéis (depth ≥10).
+    this.seguranca.setDepth(4);
   }
 
   // ---------- Regras Centrais ----------
