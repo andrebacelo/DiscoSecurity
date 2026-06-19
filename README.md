@@ -76,12 +76,14 @@ O jogo precisa de ser servido por **HTTP local** .
 1. **VS Code + Live Server:** botão direito em `index.html` → _Open with Live Server_.
 2. **Alternativa:** `npx serve` na raiz do projeto e abrir o endereço indicado.
 
+**Jogável online:** https://andrebacelo.github.io/DiscoSecurity/
+
 ---
 
 ## Aspetos multimédia
 - **Imagens / sprites:** pixel art (fundos da rua e da discoteca, segurança,
   cliente, obstáculos — coluna, caixa, mesa, plataforma — e logótipo). Geradas
-  com IA (Google Gemini) e **processadas e otimizadas por nós** (recorte,
+  com IA (Google Gemini e ChatGPT) e **processadas e otimizadas por nós** (recorte,
   remoção de fundo/transparência, redução para 1080p e paleta de cores). Formato
   PNG.
 - **Som:** efeitos (clique, salto, embate, apanhar, fuga, game over) e duas
