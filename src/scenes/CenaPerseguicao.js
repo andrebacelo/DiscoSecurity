@@ -43,7 +43,8 @@ class CenaPerseguicao extends Phaser.Scene {
   // preload() carrega os ficheiros desta cena para a memória.
   preload() {
     this.load.image('fundo-disco', 'src/assets/images/fundo-disco.png');
-    this.load.image('seguranca', 'src/assets/images/seguranca.png');
+    // Segurança ANIMADO (6 frames de caminhada).
+    this.load.spritesheet('seguranca_andar', 'src/assets/images/seguranca_andar.png', { frameWidth: 138, frameHeight: 246 });
     // Sprites do nível. As pilhas altas (coluna, caixa) servem de MURO;
     // a caixa única e a mesa são os obstáculos do chão (saltáveis).
     this.load.image('obs-coluna', 'src/assets/images/obs-coluna.png');   // coluna → muro
@@ -52,7 +53,7 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.image('plataforma', 'src/assets/images/plataforma.png');
     // Sprites do intruso (o cliente que entrou — variantes chapéu/óculos).
     this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
-    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
+    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 675 });
     this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
     this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Sons da perseguição.
@@ -61,11 +62,6 @@ class CenaPerseguicao extends Phaser.Scene {
     this.load.audio('apanhar', 'src/assets/audio/apanhar.mp3');
     this.load.audio('escapou', 'src/assets/audio/escapou.mp3');
     this.load.audio('musica-perseguicao', 'src/assets/audio/musica-perseguicao.mp3');
-    // Sprites do cliente (para mostrar o intruso a fugir).
-    this.load.spritesheet('cliente_andar', 'src/assets/images/cliente_andar.png', { frameWidth: 356, frameHeight: 593 });
-    this.load.spritesheet('cliente_andar_chapeu', 'src/assets/images/cliente_andar_chapeu.png', { frameWidth: 418, frameHeight: 941 });
-    this.load.spritesheet('cliente_oculos', 'src/assets/images/cliente_oculos.png', { frameWidth: 384, frameHeight: 457 });
-    this.load.spritesheet('cliente_chapeu_oculos_andar', 'src/assets/images/cliente_chapeu_oculos_andar.png', { frameWidth: 256, frameHeight: 372 });
     // Traduções (necessário para o modo de teste ?cena=perseguicao;
     // em jogo normal já estão na cache e o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
@@ -114,8 +110,15 @@ class CenaPerseguicao extends Phaser.Scene {
     this.obstaculos = this.physics.add.staticGroup();
     this.gerarNivel();
 
-    // (4) SEGURANÇA (jogador): sprite real com corpo físico + gravidade.
-    this.seguranca = this.physics.add.sprite(140, 860, 'seguranca');
+    // (4) SEGURANÇA (jogador): sprite ANIMADO com corpo físico + gravidade.
+    if (!this.anims.exists('seg_andar')) {
+      this.anims.create({
+        key: 'seg_andar',
+        frames: this.anims.generateFrameNumbers('seguranca_andar', { start: 0, end: 5 }),
+        frameRate: 8, repeat: -1,
+      });
+    }
+    this.seguranca = this.physics.add.sprite(140, 860, 'seguranca_andar');
     this.seguranca.setScale(230 / this.seguranca.height); // ~230px de altura
     this.seguranca.setCollideWorldBounds(true);           // não sai do ecrã
     this.physics.add.collider(this.seguranca, this.chao);        // pisa o chão
@@ -257,9 +260,9 @@ class CenaPerseguicao extends Phaser.Scene {
     const direita = this.cursores.right.isDown || this.teclas.D.isDown;
 
     // Movimento horizontal (+ vira o sprite para o lado do movimento).
-    if (esquerda) { corpo.setVelocityX(-CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(true); }
-    else if (direita) { corpo.setVelocityX(CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(false); }
-    else corpo.setVelocityX(0);
+    if (esquerda) { corpo.setVelocityX(-CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(true); this.seguranca.play('seg_andar', true); }
+    else if (direita) { corpo.setVelocityX(CenaPerseguicao.VEL_SEGURANCA); this.seguranca.setFlipX(false); this.seguranca.play('seg_andar', true); }
+    else { corpo.setVelocityX(0); this.seguranca.stop(); this.seguranca.setFrame(0); } // parado = 1ª frame
 
     // Salto: só quando os pés estão no chão (blocked.down).
     const querSaltar = this.cursores.up.isDown || this.teclas.W.isDown || this.teclas.SPACE.isDown;
@@ -372,6 +375,7 @@ class CenaPerseguicao extends Phaser.Scene {
   // Empurrão ao tocar num obstáculo (com cooldown para não disparar 60x/s).
   // O abanão da câmara dá feedback físico sem precisar de animação.
   tocarObstaculo(seguranca) {
+    if (this.resolvido) return; // fase já acabou: sem empurrão, abano nem som
     if (!this.podeLevarEmpurrao) return;
     this.podeLevarEmpurrao = false;
     seguranca.body.setVelocityX(-420); // atira para trás
@@ -410,6 +414,8 @@ class CenaPerseguicao extends Phaser.Scene {
     this.intruso.body.setVelocity(0, 0);
     this.seguranca.body.setVelocity(0, 0);
     this.intrusoSprite.anims.stop(); // pára a animação de corrida do intruso
+    this.seguranca.anims.stop();     // pára a animação de andar do segurança
+    this.seguranca.setFrame(0);      // fica num frame parado, não a meio do passo
     this.add.rectangle(960, 540, 1920, 1080, 0x000000, 0.45).setDepth(15);
     this.add.text(960, 480, texto, {
       fontFamily: CenaPerseguicao.FONTE, fontSize: '64px', color: cor,
@@ -425,21 +431,4 @@ class CenaPerseguicao extends Phaser.Scene {
     this.scene.resume('CenaPorta');    // retoma a fase porta onde estava
   }
 
-  // ---------- Helpers para o sprite do intruso ----------
-  obterVarianteIntruso(atributos) {
-    if (atributos.chapeu && atributos.oculos) return 'chapeu_oculos';
-    if (atributos.chapeu) return 'chapeu';
-    if (atributos.oculos) return 'oculos';
-    return 'base';
-  }
-
-  obterConfigIntruso(variante) {
-    const configs = {
-      base: { texture: 'cliente_andar', anim: 'andar', scale: 0.45 },
-      chapeu: { texture: 'cliente_andar_chapeu', anim: 'andar_chapeu', scale: 0.35 },
-      oculos: { texture: 'cliente_oculos', anim: 'andar_oculos', scale: 0.55 },
-      chapeu_oculos: { texture: 'cliente_chapeu_oculos_andar', anim: 'andar_chapeu_oculos', scale: 0.70 },
-    };
-    return configs[variante] || configs.base;
-  }
 }
