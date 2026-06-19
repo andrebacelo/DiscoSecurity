@@ -43,6 +43,7 @@ class CenaPorta extends Phaser.Scene {
     // Traduções (uma por língua). O loader ignora se já estiverem na cache.
         this.load.json('i18n-pt', 'i18n/pt.json');
         this.load.json('i18n-en', 'i18n/en.json');
+        this.load.json('i18n-es', 'i18n/es.json');
   }
   init(data) {
     if (this.registry.get('vidas') === undefined) this.registry.set('vidas', 3);
@@ -375,7 +376,7 @@ class CenaPorta extends Phaser.Scene {
   atualizarLinhasOpcoes() {
     const d = this.registry.get('dificuldade');
     const segs = (CenaPorta.TEMPO_MAXIMO / 1000) / CenaPorta.DRAIN_RATE[d];
-    const segTexto = segs.toFixed(1).replace('.', I18N.lingua === 'pt' ? ',' : '.');
+    const segTexto = segs.toFixed(1).replace('.', I18N.lingua === 'en' ? '.' : ',');
     this.labelDificuldade.setText(I18N.t('opcoes_dificuldade') + ':  '
       + I18N.t('dif_' + d) + '  (' + segTexto + 's)');
     this.labelLingua.setText(I18N.t('opcoes_lingua') + ':  ' + I18N.t('lingua_nome'));

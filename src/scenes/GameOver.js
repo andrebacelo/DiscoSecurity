@@ -9,6 +9,7 @@ class GameOverScene extends Phaser.Scene {
     // Traduções (já em cache em jogo normal; o loader não repete).
     this.load.json('i18n-pt', 'i18n/pt.json');
     this.load.json('i18n-en', 'i18n/en.json');
+    this.load.json('i18n-es', 'i18n/es.json');
   }
 
   // Recebe os dados passados no scene.start(..., { score }).

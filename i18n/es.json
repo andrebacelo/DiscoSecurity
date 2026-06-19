@@ -1,0 +1,60 @@
+{
+  "menu_jogar": "JUGAR",
+  "menu_opcoes": "OPCIONES",
+  "menu_quit": "SALIR",
+
+  "opcoes_titulo": "OPCIONES",
+  "opcoes_dificuldade": "DIFICULTAD",
+  "opcoes_lingua": "IDIOMA",
+  "lingua_nome": "ESPAÑOL",
+  "opcoes_musica": "MÚSICA",
+  "opcoes_efeitos": "EFECTOS",
+  "opcoes_clica": "haz clic en las líneas para cambiar",
+  "opcoes_como_jogar": "CÓMO JUGAR",
+  "opcoes_voltar": "VOLVER",
+
+  "comojogar_titulo": "CÓMO JUGAR",
+  "comojogar_texto": "FASE PUERTA\nLee las reglas en la esquina y decide a tiempo:\n←  RECHAZAR        →  DEJAR ENTRAR\nAcertar da un punto. Fallar quita una vida.\n\nFASE PERSECUCIÓN\n¿Dejaste entrar a un prohibido? ¡Atrápalo!\nMover: ← →  o  A D       Saltar: ESPACIO\nAtrápalo antes de la salida y recuperas la vida.\n\nESC pausa el juego.    Sin vidas = Game Over.",
+
+  "dif_facil": "FÁCIL",
+  "dif_normal": "NORMAL",
+  "dif_dificil": "DIFÍCIL",
+
+  "regras_titulo": "REGLAS DE LA PUERTA",
+  "regra_idade18": "Edad mínima: 18",
+  "regra_idade21": "Edad mínima: 21",
+  "regra_crocs": "Prohibido: crocs",
+  "regra_botas": "Prohibido: botas",
+  "regra_chapeu": "Prohibido: sombrero",
+  "regra_oculos": "Prohibido: gafas",
+  "regra_chapeu_grande": "Prohibido Sombrero",
+  "regra_oculos_grande": "Prohibido Gafas",
+  "regra_ambos_grande": "Prohibido Sombrero y Gafas",
+
+  "hud_pontos": "Puntos: ",
+  "dica_porta": "←  Rechazar          →  Dejar entrar",
+  "fb_certo": "¡Correcto!",
+  "fb_nova_regra": "¡NUEVA REGLA!",
+  "fb_duas_regras": "¡DOS REGLAS!",
+  "fb_podia_entrar": "¡Ese podía entrar!",
+  "fb_entrou_proibido": "¡Entró un prohibido!",
+  "fb_tempo": "¡Tiempo agotado!",
+
+  "quit_obrigado": "¡Gracias por jugar!",
+  "quit_fechar": "Ya puedes cerrar la pestaña.",
+
+  "pausa_titulo": "PAUSA",
+  "pausa_continuar": "CONTINUAR",
+  "pausa_menu": "VOLVER AL MENÚ",
+  "pausa_dica": "ESC para continuar",
+
+  "chase_aviso": "¡ATRAPA AL INTRUSO!",
+  "chase_dica": "¡Atrapa al intruso!  ←→ / A D mover   ESPACIO saltar",
+  "chase_intruso": "¡INTRUSO!",
+  "chase_apanhaste": "¡ATRAPADO!",
+  "chase_escapou": "¡ESCAPÓ!",
+
+  "go_titulo": "GAME OVER",
+  "go_pontos": "Puntos finales: ",
+  "go_reiniciar": "Pulsa ESPACIO para reiniciar"
+}
