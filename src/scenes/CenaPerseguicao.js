@@ -44,7 +44,7 @@ class CenaPerseguicao extends Phaser.Scene {
   preload() {
     this.load.image('fundo-disco', 'src/assets/images/fundo-disco.png');
     // Segurança ANIMADO (6 frames de caminhada).
-    this.load.spritesheet('seguranca_andar', 'src/assets/images/seguranca_andar.png', { frameWidth: 138, frameHeight: 258 });
+    this.load.spritesheet('seguranca_andar', 'src/assets/images/seguranca_andar.png', { frameWidth: 138, frameHeight: 246 });
     // Sprites do nível. As pilhas altas (coluna, caixa) servem de MURO;
     // a caixa única e a mesa são os obstáculos do chão (saltáveis).
     this.load.image('obs-coluna', 'src/assets/images/obs-coluna.png');   // coluna → muro
