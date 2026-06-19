@@ -37,13 +37,13 @@ class CenaPorta extends Phaser.Scene {
 
     this.load.audio('ui-click', 'src/assets/audio/ui-click.mp3'); // clique dos botões
     this.load.audio('musica-menu', 'src/assets/audio/musica-menu.mp3'); // fundo do menu/porta
+    this.load.audio('entrou', 'src/assets/audio/entrou.mp3');
+    this.load.audio('barrado', 'src/assets/audio/barrado.mp3');
+    this.load.audio('Entrou_errado', 'src/assets/audio/Entrou_errado.mp3');
     // Traduções (uma por língua). O loader ignora se já estiverem na cache.
-    this.load.json('i18n-pt', 'i18n/pt.json');
-    this.load.json('i18n-en', 'i18n/en.json');
+        this.load.json('i18n-pt', 'i18n/pt.json');
+        this.load.json('i18n-en', 'i18n/en.json');
   }
-
-  // init() corre antes de create(). Garante que vidas/pontos existem no
-  // registry (estado partilhado que sobrevive entre cenas).
   init(data) {
     if (this.registry.get('vidas') === undefined) this.registry.set('vidas', 3);
     if (this.registry.get('pontos') === undefined) this.registry.set('pontos', 0);
@@ -481,11 +481,14 @@ class CenaPorta extends Phaser.Scene {
     const correta = deveEntrar === deixouEntrar;
 
     if (deixouEntrar) this.entrarPelaPorta(this.cliente);
-    else this.voltarParaRua(this.cliente);
+    else {
+      this.voltarParaRua(this.cliente);
+    }
 
     if (correta) {
       this.registry.set('pontos', this.registry.get('pontos') + 1);
       this.mostrarFeedback(I18N.t('fb_certo'), '#a8e6a3');
+      Som.efeito(this, 'entrou');
       // Ganha tempo com acertos (ex: 1.5s em vez de 2.5s para manter a dificuldade)
       this.tempoAtual += 1500;
       if (this.tempoAtual > CenaPorta.TEMPO_MAXIMO) this.tempoAtual = CenaPorta.TEMPO_MAXIMO;
@@ -494,9 +497,11 @@ class CenaPorta extends Phaser.Scene {
       this.registry.set('vidas', this.registry.get('vidas') - 1);
       if (!deveEntrar && deixouEntrar) {
         // ERRO GRAVE: entrou um proibido. Hook da perseguição.
+        Som.efeito(this, 'Entrou_errado');
         this.mostrarFeedback(I18N.t('fb_entrou_proibido'), '#ff6b6b');
         this.onIntrusoEntrou();
       } else {
+        Som.efeito(this, 'barrado');
         this.mostrarFeedback(I18N.t('fb_podia_entrar'), '#ff6b6b');
       }
     }
