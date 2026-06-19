@@ -29,7 +29,8 @@ escapa um proibido, persegue-lo lá dentro.
 
 ### Fase porta (loop principal)
 Os clientes chegam um a um. As **regras ativas** estão sempre visíveis no ecrã
-(ex.: idade mínima, sem crocs, sem chapéu). Dentro de um **tempo limite**,
+(proibido chapéu, proibido óculos, ou ambos — as regras evoluem com a
+pontuação). Dentro de um **tempo limite**,
 decides **deixar entrar** ou **barrar**, comparando os atributos do cliente com
 as regras. Acertar dá pontos; errar custa uma vida.
 
@@ -50,7 +51,7 @@ Pontuação + vidas. Sem vidas = **Game Over**, com reinício.
 - 3 níveis de **dificuldade** (afetam o tempo de decisão e a velocidade do intruso)
 - Nível de perseguição **gerado aleatoriamente**
 - **Menu de pausa** (ESC)
-- **2 línguas** (Português / Inglês) com seletor
+- **3 línguas** (Português / Inglês / Espanhol) com seletor
 - **Controlo de volume** separado para música e efeitos (guardado entre sessões)
 - Efeitos sonoros e músicas de fundo
 
@@ -92,9 +93,9 @@ O jogo precisa de ser servido por **HTTP local** .
 - **Fonte:** "Press Start 2P" ([Google Fonts](https://fonts.google.com/specimen/Press+Start+2P),
   licença OFL), incluída localmente em `src/assets/fonts/`.
 - **Internacionalização (i18n):** traduções em ficheiro (`i18n/pt.json`,
-  `i18n/en.json`), sem strings de UI no código.
+  `i18n/en.json`, `i18n/es.json`), sem strings de UI no código.
 - **Tamanho:** sprites em resolução proporcional ao uso e áudio comprimido —
-  total dos ficheiros versionados abaixo de ~6 MB.
+  total dos ficheiros versionados abaixo de ~10 MB.
 
 ---
 
@@ -103,11 +104,11 @@ O jogo precisa de ser servido por **HTTP local** .
 index.html            # carrega o Phaser (CDN) e os scripts do jogo
 src/
   main.js             # config do jogo + registo das cenas
-  i18n.js             # traduções (PT/EN)
+  i18n.js             # traduções (PT/EN/ES)
   som.js              # volumes de música e efeitos
   ui.js               # botão padrão partilhado
   objects/Cliente.js  # o cliente da fase porta
   scenes/             # CenaPorta, CenaPerseguicao, CenaPausa, GameOver
   assets/             # images/, audio/, fonts/
-i18n/                 # pt.json, en.json
+i18n/                 # pt.json, en.json, es.json
 ```
